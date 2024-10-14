@@ -15,6 +15,10 @@
                 'email' => $user->getEmail(),
             ];
 
+            if ($user->getPassword()) {
+                $data['password'] = password_hash($user->getPassword(), PASSWORD_BCRYPT);
+            }
+
             if ($user->getId()) {
                 // Update existing user
                 $this->connection->update('users', $data, ['id' => $user->getId()]);
@@ -49,6 +53,19 @@
                 ->from('users')
                 ->where('id = :id')
                 ->setParameter('id', $id)
+                ->executeQuery();
+
+            $userData = $result->fetchAssociative();
+            return $userData ? User::fromArray($userData) : null;
+        }
+
+        public function findByEmail($email) {
+            $queryBuilder = $this->connection->createQueryBuilder();
+            $result = $queryBuilder
+                ->select('*')
+                ->from('users')
+                ->where('email = :email')
+                ->setParameter('email', $email)
                 ->executeQuery();
 
             $userData = $result->fetchAssociative();

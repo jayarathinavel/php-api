@@ -27,6 +27,7 @@
         "doctrine/orm": "^3.3",
         "doctrine/dbal": "^4.2",
         "doctrine/cache": "^2.2",
-        "doctrine/event-manager": "^2.0"
+        "doctrine/event-manager": "^2.0",
+        "firebase/php-jwt": "^6.10"
     }
 }
