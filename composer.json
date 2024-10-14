@@ -1,0 +1,32 @@
+{
+    "name": "jrv/api",
+    "description": "A API App for my Personal Use",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Jrv\\Api\\": "src/",
+            "Core\\": "src/Core/",
+            "Features\\": "src/Features/"
+
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Core\\Tests\\": "tests/Core/",
+            "Features\\Tests\\": "tests/Features/"
+        }
+    },
+    "authors": [
+        {
+            "name": "jayarathinavel",
+            "email": "jayrathinavel@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "doctrine/orm": "^3.3",
+        "doctrine/dbal": "^4.2",
+        "doctrine/cache": "^2.2",
+        "doctrine/event-manager": "^2.0"
+    }
+}
