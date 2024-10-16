@@ -17,13 +17,11 @@
 
             if (!isset($headers['Authorization'])) {
                 $this->unauthorized();
-                return false;
             }
 
             $authHeader = $headers['Authorization'];
             if (strpos($authHeader, 'Bearer ') !== 0) {
                 $this->unauthorized();
-                return false;
             }
 
             $token = substr($authHeader, 7);
@@ -31,16 +29,11 @@
 
             if (!$userData) {
                 $this->unauthorized();
-                return false;
             }
 
             if ($userData->role !== $this->requiredRole) {
                 $this->forbidden();
-                return false;
             }
-
-            // Optionally, set user data to a global state or context
-            // For simplicity, we skip this step
 
             return true;
         }

@@ -29,9 +29,6 @@
             }
 
             return true;
-
-            // Optionally, set user data to a global state or context
-            // For simplicity, we skip this step
         }
 
         private function unauthorized() {
