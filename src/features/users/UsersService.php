@@ -10,12 +10,17 @@
 
         public function createUser($data) {
             // Validate data
-            if (empty($data['name']) || empty($data['email'])) {
-                return ['success' => false, 'message' => 'Name and email are required'];
+            if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
+                return ['success' => false, 'message' => 'Name, email, and password are required'];
+            }
+
+            // Check if email already exists
+            if ($this->usersRepository->findByEmail($data['email'])) {
+                return ['success' => false, 'message' => 'Email already exists'];
             }
 
             // Create user
-            $user = new User($data['name'], $data['email']);
+            $user = new User($data['name'], $data['email'], $data['password']);
             $savedUser = $this->usersRepository->save($user);
 
             if ($savedUser->getId()) {
@@ -45,7 +50,14 @@
                 $user->setName($data['name']);
             }
             if (isset($data['email'])) {
+                // Check if new email is unique
+                if ($data['email'] !== $user->getEmail() && $this->usersRepository->findByEmail($data['email'])) {
+                    return ['success' => false, 'message' => 'Email already exists'];
+                }
                 $user->setEmail($data['email']);
+            }
+            if (isset($data['password'])) {
+                $user->setPassword($data['password']);
             }
 
             $updatedUser = $this->usersRepository->save($user);

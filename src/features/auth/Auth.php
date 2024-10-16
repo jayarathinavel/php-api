@@ -1,14 +1,14 @@
 <?php
-    namespace Features\Users;
+    namespace Features\Auth;
 
-    class User {
+    class Auth {
         private $id;
         private $name;
         private $email;
         private $password;
         private $role;
 
-        public function __construct($name, $email, $password = null, $role = 'user', $id = null) {
+        public function __construct($name, $email, $password, $role = 'user', $id = null) {
             $this->id = $id;
             $this->name = $name;
             $this->email = $email;
@@ -31,6 +31,7 @@
         public function setName($name) {
             $this->name = $name;
         }
+
 
         public function getEmail() {
             return $this->email;
@@ -66,12 +67,6 @@
         }
 
         public static function fromArray($data) {
-            return new self(
-                $data['name'],
-                $data['email'],
-                $data['password'] ?? null,
-                $data['role'] ?? 'user',
-                $data['id'] ?? null
-            );
+            return new self($data['name'], $data['email'], $data['password'], $data['role'] ?? 'user', $data['id'] ?? null);
         }
     }
