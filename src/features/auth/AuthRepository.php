@@ -28,6 +28,7 @@ class AuthRepository {
             'name' => $auth->getName(),
             'email' => $auth->getEmail(),
             'password' => password_hash($auth->getPassword(), PASSWORD_BCRYPT),
+            'role' => $auth->getRole()
         ];
 
         $this->connection->insert('users', $data);

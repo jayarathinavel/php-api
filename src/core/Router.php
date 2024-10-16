@@ -4,11 +4,11 @@
     class Router {
         private $routes = [];
 
-        public function addRoute($method, $path, $handler, $middleware = null) {
+        public function addRoute($method, $path, $handler, $middlewares = []) {
             $this->routes[$method][] = [
-                'path' => $path,
-                'handler' => $handler,
-                'middleware' => $middleware
+                'path'        => $path,
+                'handler'     => $handler,
+                'middlewares' => $middlewares
             ];
         }
 
@@ -27,11 +27,18 @@
             foreach ($this->routes[$method] as $route) {
                 $pattern = $this->convertRouteToRegex($route['path']);
                 if (preg_match($pattern, $path, $matches)) {
-                    // If middleware is set, execute it
-                    if ($route['middleware']) {
-                        $middleware = new $route['middleware']();
-                        if (!$middleware->handle()) {
-                            // Middleware can send its own response and terminate
+                    // Execute all middlewares
+                    foreach ($route['middlewares'] as $middleware) {
+                        if (is_array($middleware)) {
+                            $middlewareClass = $middleware[0];
+                            $middlewareParams = $middleware[1];
+                            $middlewareInstance = new $middlewareClass(...$middlewareParams);
+                        } else {
+                            $middlewareInstance = new $middleware();
+                        }
+
+                        if (!$middlewareInstance->handle()) {
+                            // Middleware handles the response and exits
                             return;
                         }
                     }
@@ -55,7 +62,7 @@
         private function convertRouteToRegex($route) {
             // Escape slashes
             $route = preg_replace('/\//', '\/', $route);
-            // Convert parameters {param} to regex capture groups
+            // Convert {param} to regex capture groups
             $route = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '([^\/]+)', $route);
             return '/^' . $route . '$/';
         }

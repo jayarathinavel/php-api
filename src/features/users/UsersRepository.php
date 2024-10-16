@@ -13,6 +13,7 @@
             $data = [
                 'name' => $user->getName(),
                 'email' => $user->getEmail(),
+                'role'  => $user->getRole()
             ];
 
             if ($user->getPassword()) {

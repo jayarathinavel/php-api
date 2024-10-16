@@ -19,13 +19,19 @@
                 return ['success' => false, 'message' => 'Name, email, and password are required'];
             }
 
+            // Optionally, allow role assignment (ensure this is secure)
+            $role = isset($data['role']) ? $data['role'] : 'user';
+            if ($role == 'admin') {
+                return ['success' => false, 'message' => 'Cannot Register a Admin User'];
+            }
+
             // Check if user exists
             if ($this->authRepository->findByEmail($data['email'])) {
                 return ['success' => false, 'message' => 'Email already exists'];
             }
 
             // Create user
-            $auth = new Auth( $data['name'], $data['email'], $data['password'], null,);
+            $auth = new Auth($data['name'], $data['email'], $data['password'],  $role);
             $savedAuth = $this->authRepository->create($auth);
 
             return ['success' => true, 'message' => 'User registered successfully', 'user' => $savedAuth->toArray()];
@@ -56,6 +62,7 @@
                 'data' => [
                     'id' => $user->getId(),
                     'email' => $user->getEmail(),
+                    'role'  => $user->getRole(),
                 ],
             ];
 
