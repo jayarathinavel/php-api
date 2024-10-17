@@ -31,6 +31,10 @@
                 $this->unauthorized();
             }
 
+            if ($userData->role === 'admin') {
+                return true;
+            }
+
             if ($userData->role !== $this->requiredRole) {
                 $this->forbidden();
             }
