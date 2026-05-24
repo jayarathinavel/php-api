@@ -44,7 +44,10 @@
             if (isset($headers['x-app-id'])) {
                 return $headers['x-app-id'];
             }
-            return null;
+
+            $path = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+            $segments = explode('/', $path);
+            return $segments[0] ?? null;
         }
 
         private function unauthorized() {

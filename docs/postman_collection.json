@@ -1,0 +1,331 @@
+{
+  "info": {
+    "name": "My API - Users, Auth & Generic CRUD",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for the Hobby-Projects API (users, auth, and metadata-driven generic CRUD)."
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
+    { "key": "app_id", "value": "myApp", "type": "string" },
+    { "key": "feature_name", "value": "alpha", "type": "string" },
+    { "key": "record_id", "value": "", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "userId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"secret123\",\n  \"app_id\": \"{{app_id}}\"\n}"
+        },
+        "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-App-Id", "value": "{{app_id}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"secret123\"\n}"
+        },
+        "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var json = pm.response.json();",
+              "if(json && json.token){ pm.environment.set('token', json.token); }",
+              "// Save returned user id if present",
+              "if(json.user && json.user.id){ pm.environment.set('userId', json.user.id); }",
+              
+              "var json = pm.response.json();",
+              "if(json && json.token){ pm.collectionVariables.set('token', json.token); }",
+              "// Save returned user id if present",
+              "if(json.user && json.user.id){ pm.collectionVariables.set('userId', json.user.id); }"
+
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "Create User",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-App-Id", "value": "{{app_id}}" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"new@example.com\",\n  \"password\": \"pass123\",\n  \"role\": \"user\"\n}"
+        },
+        "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Users",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-App-Id", "value": "{{app_id}}" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Get User by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-App-Id", "value": "{{app_id}}" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": { "raw": "{{base_url}}/users/{{userId}}", "host": ["{{base_url}}"], "path": ["users", "{{userId}}"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Update User",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-App-Id", "value": "{{app_id}}" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Updated Name\"\n}"
+        },
+        "url": { "raw": "{{base_url}}/users/{{userId}}", "host": ["{{base_url}}"], "path": ["users", "{{userId}}"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete User",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "X-App-Id", "value": "{{app_id}}" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": { "raw": "{{base_url}}/users/{{userId}}", "host": ["{{base_url}}"], "path": ["users", "{{userId}}"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Run DDL or DML Query",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "text/plain" },
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "-- api.myApp_alpha definition\n\nCREATE TABLE `myApp_alpha` (\n  `id` int NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) NOT NULL,\n  `description` text,\n  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/query",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "query"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Generic CRUD",
+      "description": "Before using these requests, create the target feature table and add one row to crud_resources, for example: app_id={{app_id}}, feature_name={{feature_name}}, table_name={{app_id}}_{{feature_name}}, primary_key=id.",
+      "item": [
+        {
+          "name": "List Records",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/{{app_id}}/{{feature_name}}/all",
+              "host": ["{{base_url}}"],
+              "path": ["{{app_id}}", "{{feature_name}}", "all"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Record by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/{{app_id}}/{{feature_name}}/{{record_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{app_id}}", "{{feature_name}}", "{{record_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Record",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample record\",\n  \"description\": \"Created from Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/{{app_id}}/{{feature_name}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{app_id}}", "{{feature_name}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json && json.data && json.data.id) {",
+                  "  pm.environment.set('record_id', json.data.id);",
+                  "}",
+                  "var json = pm.response.json();",
+                  "if (json && json.data && json.data.id) {",
+                  "  pm.collectionVariables.set('record_id', json.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Create Multiple Records",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"name\": \"First sample\",\n    \"description\": \"Created from Postman\"\n  },\n  {\n    \"name\": \"Second sample\",\n    \"description\": \"Created from Postman\"\n  }\n]"
+            },
+            "url": {
+              "raw": "{{base_url}}/{{app_id}}/{{feature_name}}/all",
+              "host": ["{{base_url}}"],
+              "path": ["{{app_id}}", "{{feature_name}}", "all"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Record",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated sample record\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/{{app_id}}/{{feature_name}}/{{record_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{app_id}}", "{{feature_name}}", "{{record_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Patch Record",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Partially updated from Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/{{app_id}}/{{feature_name}}/{{record_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{app_id}}", "{{feature_name}}", "{{record_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Record",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/{{app_id}}/{{feature_name}}/{{record_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{app_id}}", "{{feature_name}}", "{{record_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Body Example",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unknown_column\": \"This should fail\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/{{app_id}}/{{feature_name}}",
+              "host": ["{{base_url}}"],
+              "path": ["{{app_id}}", "{{feature_name}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

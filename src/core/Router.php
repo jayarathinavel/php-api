@@ -18,7 +18,7 @@
 
         public function handleRequest() {
             $method = $_SERVER['REQUEST_METHOD'];
-            $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+            $path = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') ?: '/';
 
             if (!isset($this->routes[$method])) {
                 $this->sendNotFound();
