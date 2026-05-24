@@ -13,10 +13,14 @@
             $this->jwtConfig = require $_SERVER['DOCUMENT_ROOT'] . '/config/jwt.php';
         }
 
-        public function register($data) {
+        public function register($data, $appId) {
             // Validate data
             if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
                 return ['success' => false, 'message' => 'Name, email, and password are required'];
+            }
+
+            if (empty($appId)) {
+                return ['success' => false, 'message' => 'app_id is required'];
             }
 
             // Optionally, allow role assignment (ensure this is secure)
@@ -25,31 +29,35 @@
                 return ['success' => false, 'message' => 'Cannot Register a Admin User'];
             }
 
-            // Check if user exists
-            if ($this->authRepository->findByEmail($data['email'])) {
+            // Check if user exists for this app
+            if ($this->authRepository->findByEmail($data['email'], $appId)) {
                 return ['success' => false, 'message' => 'Email already exists'];
             }
 
             // Create user
-            $auth = new Auth($data['name'], $data['email'], $data['password'],  $role);
+            $auth = new Auth($data['name'], $data['email'], $data['password'], $role, $appId);
             $savedAuth = $this->authRepository->create($auth);
 
             return ['success' => true, 'message' => 'User registered successfully', 'user' => $savedAuth->toArray()];
         }
 
-        public function login($data) {
+        public function login($data, $appId) {
+            if (empty($appId)) {
+                return ['success' => false, 'message' => 'app_id is required'];
+            }
+
             if (empty($data['email']) || empty($data['password'])) {
                 return ['success' => false, 'message' => 'Email and password are required'];
             }
 
-            $user = $this->authRepository->findByEmail($data['email']);
+            $user = $this->authRepository->findByEmail($data['email'], $appId);
             if (!$user || !password_verify($data['password'], $user->getPassword())) {
                 return ['success' => false, 'message' => 'Invalid credentials'];
             }
 
             $token = $this->generateJWT($user);
 
-            return ['success' => true, 'message' => 'Login successful', 'token' => $token];
+            return ['success' => true, 'message' => 'Login successful', 'token' => $token, 'user' => $user->toArray()];
         }
 
         private function generateJWT($user) {
@@ -63,6 +71,7 @@
                     'id' => $user->getId(),
                     'email' => $user->getEmail(),
                     'role'  => $user->getRole(),
+                    'app_id' => $user->getAppId(),
                 ],
             ];
 

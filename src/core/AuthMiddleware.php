@@ -28,7 +28,23 @@
                 $this->unauthorized();
             }
 
+            $appId = $this->getAppId();
+            if (empty($appId) || empty($userData->app_id) || $userData->app_id !== $appId) {
+                $this->unauthorized();
+            }
+
             return true;
+        }
+
+        private function getAppId() {
+            $headers = getallheaders();
+            if (isset($headers['X-App-Id'])) {
+                return $headers['X-App-Id'];
+            }
+            if (isset($headers['x-app-id'])) {
+                return $headers['x-app-id'];
+            }
+            return null;
         }
 
         private function unauthorized() {

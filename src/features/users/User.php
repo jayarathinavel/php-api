@@ -7,13 +7,15 @@
         private $email;
         private $password;
         private $role;
+        private $appId;
 
-        public function __construct($name, $email, $password = null, $role = 'user', $id = null) {
+        public function __construct($name, $email, $password = null, $role = 'user', $appId = null, $id = null) {
             $this->id = $id;
             $this->name = $name;
             $this->email = $email;
             $this->password = $password;
             $this->role = $role;
+            $this->appId = $appId;
         }
 
         public function getId() {
@@ -56,12 +58,21 @@
             $this->role = $role;
         }
 
+        public function getAppId() {
+            return $this->appId;
+        }
+
+        public function setAppId($appId) {
+            $this->appId = $appId;
+        }
+
         public function toArray() {
             return [
                 'id' => $this->id,
                 'name' => $this->name,
                 'email' => $this->email,
                 'role'  => $this->role,
+                'app_id' => $this->appId,
             ];
         }
 
@@ -71,6 +82,7 @@
                 $data['email'],
                 $data['password'] ?? null,
                 $data['role'] ?? 'user',
+                $data['app_id'] ?? null,
                 $data['id'] ?? null
             );
         }

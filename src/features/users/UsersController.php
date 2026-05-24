@@ -8,9 +8,23 @@
             $this->usersService = new UsersService();
         }
 
+        private function getAppId() {
+            $headers = getallheaders();
+            if (isset($headers['X-App-Id'])) {
+                return $headers['X-App-Id'];
+            }
+            if (isset($headers['x-app-id'])) {
+                return $headers['x-app-id'];
+            }
+
+            $data = json_decode(file_get_contents('php://input'), true);
+            return $data['app_id'] ?? null;
+        }
+
         public function createUser() {
             $data = json_decode(file_get_contents('php://input'), true);
-            $result = $this->usersService->createUser($data);
+            $appId = $this->getAppId();
+            $result = $this->usersService->createUser($data, $appId);
 
             header('Content-Type: application/json');
             if ($result['success']) {
@@ -22,14 +36,16 @@
         }
 
         public function getUsers() {
-            $users = $this->usersService->getUsers();
+            $appId = $this->getAppId();
+            $users = $this->usersService->getUsers($appId);
 
             header('Content-Type: application/json');
             echo json_encode($users);
         }
 
         public function getUser($id) {
-            $user = $this->usersService->getUser($id);
+            $appId = $this->getAppId();
+            $user = $this->usersService->getUser($id, $appId);
 
             header('Content-Type: application/json');
             if ($user) {
@@ -42,7 +58,8 @@
 
         public function updateUser($id) {
             $data = json_decode(file_get_contents('php://input'), true);
-            $result = $this->usersService->updateUser($id, $data);
+            $appId = $this->getAppId();
+            $result = $this->usersService->updateUser($id, $data, $appId);
 
             header('Content-Type: application/json');
             if ($result['success']) {
@@ -54,7 +71,8 @@
         }
 
         public function deleteUser($id) {
-            $result = $this->usersService->deleteUser($id);
+            $appId = $this->getAppId();
+            $result = $this->usersService->deleteUser($id, $appId);
 
             header('Content-Type: application/json');
             if ($result['success']) {

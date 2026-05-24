@@ -8,9 +8,22 @@
             $this->authService = new AuthService();
         }
 
+        private function getAppId() {
+            $headers = getallheaders();
+            if (isset($headers['X-App-Id'])) {
+                return $headers['X-App-Id'];
+            }
+            if (isset($headers['x-app-id'])) {
+                return $headers['x-app-id'];
+            }
+            $data = json_decode(file_get_contents('php://input'), true);
+            return $data['app_id'] ?? null;
+        }
+
         public function register() {
             $data = json_decode(file_get_contents('php://input'), true);
-            $result = $this->authService->register($data);
+            $appId = $this->getAppId();
+            $result = $this->authService->register($data, $appId);
 
             header('Content-Type: application/json');
             if ($result['success']) {
@@ -23,7 +36,8 @@
 
         public function login() {
             $data = json_decode(file_get_contents('php://input'), true);
-            $result = $this->authService->login($data);
+            $appId = $this->getAppId();
+            $result = $this->authService->login($data, $appId);
 
             header('Content-Type: application/json');
             if ($result['success']) {
