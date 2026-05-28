@@ -14,6 +14,10 @@
         }
 
         public function register($data, $appId) {
+            if (!$this->isRegistrationEnabled()) {
+                return ['success' => false, 'message' => "Registration is disabled"];
+            }
+
             // Validate data
             if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
                 return ['success' => false, 'message' => 'Name, email, and password are required'];
@@ -39,6 +43,16 @@
             $savedAuth = $this->authRepository->create($auth);
 
             return ['success' => true, 'message' => 'User registered successfully', 'user' => $savedAuth->toArray()];
+        }
+
+        private function isRegistrationEnabled() {
+            $envValue = getenv('REGISTRATION_ENABLED');
+            if ($envValue === false) {
+                return true;
+            }
+
+            $normalized = strtolower(trim($envValue));
+            return !in_array($normalized, ['0', 'false', 'no', 'off'], true);
         }
 
         public function login($data, $appId) {

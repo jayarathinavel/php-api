@@ -36,9 +36,13 @@ DB_DATABASE=api
 DB_USERNAME=root
 DB_PASSWORD=root
 DB_CHARSET=utf8mb4
+REGISTRATION_ENABLED=true
 ```
 
 ## Notes
 
 - The app bootstraps in `index.php`.
 - The default timezone is set to `Asia/Kolkata`.
+- Refer to [docs/developer-guide.md](docs/developer-guide.md) for the Generic CRUD APIs usage.
+- Use the Postman Collections in [docs/postman_collection.json](docs/postman_collection.json) to test the APIs.
+- Refer to [docs/troubleshooting.md](docs/troubleshooting.md) for common issues and solutions.
