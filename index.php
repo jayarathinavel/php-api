@@ -22,7 +22,13 @@
     use Features\Users\UsersController;
     use Features\WorkTracker\WorkTrackerRouter;
 
-    $router = new Router();
+    // Handle base path for subdirectory deployments (e.g., serv00)
+    $basePath = getenv('APP_BASE_PATH') ?: '';
+    if ($basePath) {
+        $basePath = '/' . trim($basePath, '/');
+    }
+
+    $router = new Router($basePath);
 
     // Register existing routes
     $router->addRoute('POST', '/register', [AuthController::class, 'register'], 'public');

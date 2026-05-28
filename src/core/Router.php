@@ -3,6 +3,11 @@
 
     class Router {
         private $routes = [];
+        private $basePath = '';
+
+        public function __construct($basePath = '') {
+            $this->basePath = rtrim($basePath, '/');
+        }
 
         public function addRoute($method, $path, $handler, $auth) {
             $this->routes[$method][] = [
@@ -20,6 +25,12 @@
         public function handleRequest() {
             $method = $_SERVER['REQUEST_METHOD'];
             $path = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') ?: '/';
+            
+            // Strip base path if configured
+            if ($this->basePath && strpos($path, $this->basePath) === 0) {
+                $path = substr($path, strlen($this->basePath));
+                $path = rtrim($path, '/') ?: '/';
+            }
 
             if (!isset($this->routes[$method])) {
                 $this->sendNotFound();
