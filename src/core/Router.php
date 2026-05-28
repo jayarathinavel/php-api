@@ -9,6 +9,7 @@
                 'path'        => $path,
                 'handler'     => $handler,
                 'middlewares' => $this->getMiddlewares($auth),
+                'specificity' => $this->computeSpecificity($path),
             ];
         }
         
@@ -24,6 +25,14 @@
                 $this->sendNotFound();
                 return;
             }
+
+            // Sort routes by specificity (more static segments first), then by path length
+            usort($this->routes[$method], function($a, $b) {
+                if ($a['specificity'] === $b['specificity']) {
+                    return strlen($b['path']) - strlen($a['path']);
+                }
+                return $b['specificity'] - $a['specificity'];
+            });
 
             foreach ($this->routes[$method] as $route) {
                 $pattern = $this->convertRouteToRegex($route['path']);
@@ -59,6 +68,20 @@
             $route = preg_replace('/\//', '\/', $route);
             $route = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '([^\/]+)', $route);
             return '/^' . $route . '$/';
+        }
+
+        private function computeSpecificity($path) {
+            $segments = array_values(array_filter(explode('/', trim($path, '/')),
+                fn($s) => $s !== ''
+            ));
+            $score = 0;
+            foreach ($segments as $seg) {
+                // static segment (no parameter) counts as 1
+                if (strpos($seg, '{') === false && strpos($seg, '}') === false) {
+                    $score += 1;
+                }
+            }
+            return $score;
         }
 
         private function sendNotFound() {

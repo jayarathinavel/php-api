@@ -8,8 +8,8 @@
     { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
     { "key": "app_id", "value": "myApp", "type": "string" },
     { "key": "feature_name", "value": "alpha", "type": "string" },
-    { "key": "record_id", "value": "", "type": "string" },
-    { "key": "token", "value": "", "type": "string" },
+    { "key": "record_id", "value": "", "type": "string" },    { "key": "taskId", "value": "", "type": "string" },
+    { "key": "workLogId", "value": "", "type": "string" },    { "key": "token", "value": "", "type": "string" },
     { "key": "userId", "value": "", "type": "string" }
   ],
   "item": [
@@ -326,6 +326,219 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Work Tracker",
+      "description": "Task manager and work log endpoints for the work tracker feature.",
+      "item": [
+        {
+          "name": "Create Task",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Sprint planning\",\n  \"description\": \"Plan the next sprint tasks\",\n  \"status\": \"pending\",\n  \"reference\": \"WEB-123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/work-tracker/task-manager",
+              "host": ["{{base_url}}"],
+              "path": ["work-tracker", "task-manager"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json && json.id) {",
+                  "  pm.collectionVariables.set('taskId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Get Tasks",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/work-tracker/task-manager",
+              "host": ["{{base_url}}"],
+              "path": ["work-tracker", "task-manager"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Task by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}",
+              "host": ["{{base_url}}"],
+              "path": ["work-tracker", "task-manager", "{{taskId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Task",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in-progress\",\n  \"description\": \"Updating to in-progress status\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}",
+              "host": ["{{base_url}}"],
+              "path": ["work-tracker", "task-manager", "{{taskId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Task",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}",
+              "host": ["{{base_url}}"],
+              "path": ["work-tracker", "task-manager", "{{taskId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Work Log",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-05-28\",\n  \"done\": \"Completed initial task planning\",\n  \"todo\": \"Review backlog and assign tickets\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/work-tracker/work-log",
+              "host": ["{{base_url}}"],
+              "path": ["work-tracker", "work-log"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json && json.id) {",
+                  "  pm.collectionVariables.set('workLogId', json.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Get Work Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/work-tracker/work-log",
+              "host": ["{{base_url}}"],
+              "path": ["work-tracker", "work-log"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Work Log by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/work-tracker/work-log/{{workLogId}}",
+              "host": ["{{base_url}}"],
+              "path": ["work-tracker", "work-log", "{{workLogId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Work Log",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"done\": \"Updated work log details\",\n  \"todo\": \"Prepare follow-up actions\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/work-tracker/work-log/{{workLogId}}",
+              "host": ["{{base_url}}"],
+              "path": ["work-tracker", "work-log", "{{workLogId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Work Log",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/work-tracker/work-log/{{workLogId}}",
+              "host": ["{{base_url}}"],
+              "path": ["work-tracker", "work-log", "{{workLogId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }
+
