@@ -47,4 +47,10 @@
             }
             echo json_encode($result);
         }
+        
+        public function apiCheck() {
+            header('Content-Type: application/json');
+            http_response_code(200);
+            echo json_encode(['message' => 'API is working']);
+        }
     }

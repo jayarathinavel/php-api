@@ -21,6 +21,7 @@
     use Features\Crud\CrudController;
     use Features\Users\UsersController;
     use Features\WorkTracker\WorkTrackerRouter;
+    use Features\Ytdb\YtdbRouter;
 
     // Handle base path for subdirectory deployments (e.g., serv00)
     $basePath = getenv('APP_BASE_PATH') ?: '';
@@ -31,6 +32,7 @@
     $router = new Router($basePath);
 
     // Register existing routes
+    $router->addRoute('GET', '/', [AuthController::class, 'apiCheck'], 'public');
     $router->addRoute('POST', '/register', [AuthController::class, 'register'], 'public');
     $router->addRoute('POST', '/login', [AuthController::class, 'login'], 'public');
     $router->addRoute('POST', '/users', [UsersController::class, 'createUser'], 'admin');
@@ -50,5 +52,8 @@
 
     // Register work_tracker app routes
     WorkTrackerRouter::registerRoutes($router);
+
+    // Register ytdb app routes
+    YtdbRouter::registerRoutes($router);
 
     $router->handleRequest();
