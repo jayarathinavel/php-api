@@ -1,7 +1,7 @@
 <?php
     return [
-        'secret_key' => 'coolbuddy',
-        'issuer' => 'your_domain.com',
-        'audience' => 'your_domain.com',
-        'expiration_time' => 3600, // 1 hour
+        'secret_key' => getenv('JWT_SECRET_KEY'),
+        'issuer' => getenv('JWT_ISSUER'),
+        'audience' => getenv('JWT_AUDIENCE'),
+        'expiration_time' => getenv('JWT_EXPIRATION_TIME', 3600),
     ];
