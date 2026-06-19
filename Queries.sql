@@ -49,3 +49,21 @@ CREATE TABLE IF NOT EXISTS `workTracker_worklogs` (
   PRIMARY KEY (`id`)
 );
 
+ALTER TABLE worktracker_worklogs ADD CONSTRAINT worktracker_worklogs_pk PRIMARY KEY (id);
+ALTER TABLE worktracker_tasks ADD CONSTRAINT worktracker_tasks_pk PRIMARY KEY (id);
+ALTER TABLE users ADD CONSTRAINT users_pk PRIMARY KEY (id);
+
+CREATE TABLE IF NOT EXISTS `workTracker_task_comments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `task_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `comment_text` text NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_task_id` (`task_id`),
+  KEY `idx_user_id` (`user_id`),
+  CONSTRAINT `fk_comment_task` FOREIGN KEY (`task_id`) REFERENCES `workTracker_tasks` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+)
+
