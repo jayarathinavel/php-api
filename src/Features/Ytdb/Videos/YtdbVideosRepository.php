@@ -105,7 +105,11 @@
                     WHERE v.id = :id";
             $result = $this->connection->executeQuery($sql, ['id' => $id]);
             $rows = $result->fetchAllAssociative();
-            return $this->rowsToVideos($rows)[0];
+            if (count($rows) === 0) {
+                return null;
+            }
+            $videos = $this->rowsToVideos($rows);
+            return $videos[0];
         }
 
         public function rowsToVideos($rows) {

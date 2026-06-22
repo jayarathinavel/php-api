@@ -39,6 +39,15 @@
         }
 
         public function updateVideo($id, $data, $userId) {
+            $existingVideo = $this->repository->getVideoById($id);
+            if ($existingVideo === null) {
+                return [
+                    'success' => false,
+                    'error' => 'Video not found',
+                    'statusCode' => 404
+                ];
+            }
+
             if (!$this->checkIfVideoBelongsToTheUser($id, $userId)) {
                 return [
                     'success' => false,
@@ -46,8 +55,6 @@
                     'statusCode' => 403
                 ];
             }
-
-            $existingVideo = $this->repository->getVideoById($id);
 
             $video = new YtdbVideos(
                 $id,
@@ -71,6 +78,15 @@
         }
 
         public function deleteVideo($id, $userId) {
+            $existingVideo = $this->repository->getVideoById($id);
+            if ($existingVideo === null) {
+                return [
+                    'success' => false,
+                    'error' => 'Video not found',
+                    'statusCode' => 404
+                ];
+            }
+
             if (!$this->checkIfVideoBelongsToTheUser($id, $userId)) {
                 return [
                     'success' => false,
@@ -78,6 +94,7 @@
                     'statusCode' => 403
                 ];
             }
+
             $data = $this->repository->deleteVideo($id);
             return [
                 'success' => true,
@@ -118,20 +135,28 @@
         }
 
         public function getVideoById($id, $userId) {
-            if($this->checkIfVideoBelongsToTheUser($id, $userId)){
-                $data = $this->repository->getVideoById($id);
-                return [
-                    'success' => true,
-                    'data' => $data,
-                    'statusCode' => 200
-                ];
-            } else {
+            $existingVideo = $this->repository->getVideoById($id);
+            if ($existingVideo === null) {
                 return [
                     'success' => false,
-                    'error' => 'Access denied',
-                    'statusCode' => 403
+                    'error' => 'Video not found',
+                    'statusCode' => 404
                 ];
             }
+
+            if ($this->checkIfVideoBelongsToTheUser($id, $userId)) {
+                return [
+                    'success' => true,
+                    'data' => $existingVideo,
+                    'statusCode' => 200
+                ];
+            }
+
+            return [
+                'success' => false,
+                'error' => 'Access denied',
+                'statusCode' => 403
+            ];
             
         }
     }

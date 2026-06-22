@@ -63,4 +63,14 @@
             $result = $this->connection->executeQuery($sql, ['id' => $id, 'userId' => $userId]);
             return $result->rowCount() > 0;
         }
+
+        public function getListById($id) {
+            $sql = "SELECT * FROM " . self::TABLE_NAME . " WHERE id = :id";
+            $result = $this->connection->executeQuery($sql, ['id' => $id]);
+            $rows = $result->fetchAllAssociative();
+            if (count($rows) === 0) {
+                return null;
+            }
+            return $rows[0];
+        }
     }

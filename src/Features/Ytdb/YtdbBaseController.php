@@ -26,13 +26,20 @@
                 $decoded = JWT::decode($parts[1], new Key($this->jwtConfig['secret_key'], 'HS256'));
                 return $decoded->data->id ?? null;
             } catch (\Exception $e) {
-                return null;
+                $this->sendUnauthorized('Invalid or expired token');
             }
         }
 
         public function sendError($message) {
             header('Content-Type: application/json');
             http_response_code(400);
+            echo json_encode(['error' => $message]);
+            exit;
+        }
+
+        public function sendUnauthorized($message = 'Unauthorized') {
+            header('Content-Type: application/json');
+            http_response_code(401);
             echo json_encode(['error' => $message]);
             exit;
         }

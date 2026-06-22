@@ -28,6 +28,15 @@
         }
 
         public function updateList($id, $data, $userId) {
+            $existingList = $this->repository->getListById($id);
+            if ($existingList === null) {
+                return [
+                    'success' => false,
+                    'error' => 'List not found',
+                    'statusCode' => 404
+                ];
+            }
+
             if (!$this->checkIfListBelongsToTheUser($id, $userId)) {
                 return [
                     'success' => false,
@@ -53,6 +62,15 @@
         }
 
         public function deleteList($id, $userId) {
+            $existingList = $this->repository->getListById($id);
+            if ($existingList === null) {
+                return [
+                    'success' => false,
+                    'error' => 'List not found',
+                    'statusCode' => 404
+                ];
+            }
+
             if (!$this->checkIfListBelongsToTheUser($id, $userId)) {
                 return [
                     'success' => false,
@@ -60,6 +78,7 @@
                     'statusCode' => 403
                 ];
             }
+
             $data = $this->repository->deleteList($id, $userId);
             return [
                 'success' => true,
