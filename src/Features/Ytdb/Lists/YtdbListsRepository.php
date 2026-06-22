@@ -53,7 +53,7 @@
 
 
         public function getAllLists($userId){
-            $sql = "SELECT * FROM " . self::TABLE_NAME . " WHERE visibility = 'public' AND user_id != :userId";
+            $sql = "SELECT l.*, u.name AS user_name FROM " . self::TABLE_NAME . " l JOIN users u ON l.user_id = u.id WHERE visibility = 'public' AND user_id != :userId";
             $result = $this->connection->executeQuery($sql, ['userId' => $userId]);
             return $result->fetchAllAssociative();
         }

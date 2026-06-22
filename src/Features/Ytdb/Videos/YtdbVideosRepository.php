@@ -80,9 +80,10 @@
 
         public function getAllVideosByListId($listId, $userId) {
             $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at,
-                             l.name AS list_name, l.visibility
+                             l.name AS list_name, l.visibility, u.name AS user_name
                     FROM " . self::TABLE_NAME . " v
                     JOIN ytdb_lists l ON v.list_id = l.id
+                    JOIN users u ON l.user_id = u.id
                     WHERE v.list_id = :listId
                       AND (l.visibility = 'public' OR l.user_id = :userId)
                     ORDER BY v.created_at DESC";
