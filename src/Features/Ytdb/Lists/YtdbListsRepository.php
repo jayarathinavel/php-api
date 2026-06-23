@@ -80,7 +80,11 @@
 
         public function getLists($userId){
             try {
-                $sql = "SELECT * FROM " . self::TABLE_NAME . " WHERE user_id = :userId";
+                $sql = "SELECT l.*, COUNT(v.id) as video_count
+                        FROM " . self::TABLE_NAME . " l
+                        LEFT JOIN ytdb_videos v ON l.id = v.list_id
+                        WHERE l.user_id = :userId
+                        GROUP BY l.id";
                 $result = $this->connection->executeQuery($sql, ['userId' => $userId]);
                 return $result->fetchAllAssociative();
             } catch (\Doctrine\DBAL\Exception\ConnectionException $e) {
@@ -95,7 +99,12 @@
 
         public function getAllLists($userId){
             try {
-                $sql = "SELECT l.*, u.name AS user_name FROM " . self::TABLE_NAME . " l JOIN users u ON l.user_id = u.id WHERE visibility = 'public' AND user_id != :userId";
+                $sql = "SELECT l.*, u.name AS user_name, COUNT(v.id) as video_count
+                        FROM " . self::TABLE_NAME . " l
+                        JOIN users u ON l.user_id = u.id
+                        LEFT JOIN ytdb_videos v ON l.id = v.list_id
+                        WHERE l.visibility = 'public' AND l.user_id != :userId
+                        GROUP BY l.id";
                 $result = $this->connection->executeQuery($sql, ['userId' => $userId]);
                 return $result->fetchAllAssociative();
             } catch (\Doctrine\DBAL\Exception\ConnectionException $e) {
