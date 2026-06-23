@@ -2,6 +2,8 @@
 
     namespace Features\Ytdb\Lists;
 
+    use Features\Ytdb\YtdbException;
+
     class YtdbListsService {
         private $repository;
 
@@ -10,99 +12,172 @@
         }
 
         public function createList($data, $userId) {
-            $list = new YtdbLists(
-                null,
-                $userId,
-                $data['name'],
-                $data['description'],
-                $data['visibility'],
-                null,
-                null
-            );
-            $data = $this->repository->createList($list);
-            return [
-                'success' => true,
-                'data' => $data->toArray(),
-                'statusCode' => 201
-            ];
+            try {
+                // Validate required fields
+                if (empty($data['name'])) {
+                    throw new YtdbException('List name is required', 400, 'MISSING_REQUIRED_FIELD');
+                }
+
+                // Validate visibility
+                $validVisibilities = ['public', 'private'];
+                if (isset($data['visibility']) && !in_array($data['visibility'], $validVisibilities)) {
+                    throw new YtdbException('Invalid visibility value. Must be "public" or "private"', 400, 'INVALID_INPUT_FORMAT');
+                }
+
+                $list = new YtdbLists(
+                    null,
+                    $userId,
+                    $data['name'],
+                    $data['description'] ?? null,
+                    $data['visibility'] ?? 'private',
+                    null,
+                    null
+                );
+                $data = $this->repository->createList($list);
+                return [
+                    'success' => true,
+                    'data' => $data->toArray(),
+                    'statusCode' => 201
+                ];
+            } catch (YtdbException $e) {
+                return $e->toArray();
+            } catch (\Exception $e) {
+                error_log('Unexpected error in createList: ' . $e->getMessage());
+                return [
+                    'success' => false,
+                    'error' => 'An unexpected error occurred while creating the list',
+                    'errorType' => 'INTERNAL_SERVER_ERROR',
+                    'statusCode' => 500
+                ];
+            }
         }
 
         public function updateList($id, $data, $userId) {
-            $existingList = $this->repository->getListById($id);
-            if ($existingList === null) {
-                return [
-                    'success' => false,
-                    'error' => 'List not found',
-                    'statusCode' => 404
-                ];
-            }
+            try {
+                // Validate list ID
+                if (empty($id) || !is_numeric($id)) {
+                    throw new YtdbException('Invalid list ID', 400, 'INVALID_LIST_ID');
+                }
 
-            if (!$this->checkIfListBelongsToTheUser($id, $userId)) {
+                // Validate required fields
+                if (empty($data['name'])) {
+                    throw new YtdbException('List name is required', 400, 'MISSING_REQUIRED_FIELD');
+                }
+
+                // Validate visibility
+                $validVisibilities = ['public', 'private'];
+                if (isset($data['visibility']) && !in_array($data['visibility'], $validVisibilities)) {
+                    throw new YtdbException('Invalid visibility value. Must be "public" or "private"', 400, 'INVALID_INPUT_FORMAT');
+                }
+
+                $existingList = $this->repository->getListById($id);
+                if ($existingList === null) {
+                    throw new YtdbException('List not found', 404, 'LIST_NOT_FOUND');
+                }
+
+                if (!$this->checkIfListBelongsToTheUser($id, $userId)) {
+                    throw new YtdbException('You do not have permission to update this list', 403, 'RESOURCE_NOT_OWNED');
+                }
+
+                $list = new YtdbLists(
+                    $id,
+                    $userId,
+                    $data['name'],
+                    $data['description'] ?? null,
+                    $data['visibility'] ?? 'private',
+                    null,
+                    null
+                );
+                $data = $this->repository->updateList($list);
+                return [
+                    'success' => true,
+                    'data' => $data->toArray(),
+                    'statusCode' => 200
+                ];
+            } catch (YtdbException $e) {
+                return $e->toArray();
+            } catch (\Exception $e) {
+                error_log('Unexpected error in updateList: ' . $e->getMessage());
                 return [
                     'success' => false,
-                    'error' => 'Access denied',
-                    'statusCode' => 403
+                    'error' => 'An unexpected error occurred while updating the list',
+                    'errorType' => 'INTERNAL_SERVER_ERROR',
+                    'statusCode' => 500
                 ];
             }
-            $list = new YtdbLists(
-                $id,
-                $userId,
-                $data['name'],
-                $data['description'],
-                $data['visibility'],
-                null,
-                null
-            );
-            $data = $this->repository->updateList($list);
-            return [
-                'success' => true,
-                'data' => $data->toArray(),
-                'statusCode' => 200
-            ];
         }
 
         public function deleteList($id, $userId) {
-            $existingList = $this->repository->getListById($id);
-            if ($existingList === null) {
+            try {
+                // Validate list ID
+                if (empty($id) || !is_numeric($id)) {
+                    throw new YtdbException('Invalid list ID', 400, 'INVALID_LIST_ID');
+                }
+
+                $existingList = $this->repository->getListById($id);
+                if ($existingList === null) {
+                    throw new YtdbException('List not found', 404, 'LIST_NOT_FOUND');
+                }
+
+                if (!$this->checkIfListBelongsToTheUser($id, $userId)) {
+                    throw new YtdbException('You do not have permission to delete this list', 403, 'RESOURCE_NOT_OWNED');
+                }
+
+                $data = $this->repository->deleteList($id, $userId);
+                return [
+                    'success' => true,
+                    'data' => $data,
+                    'statusCode' => 200
+                ];
+            } catch (YtdbException $e) {
+                return $e->toArray();
+            } catch (\Exception $e) {
+                error_log('Unexpected error in deleteList: ' . $e->getMessage());
                 return [
                     'success' => false,
-                    'error' => 'List not found',
-                    'statusCode' => 404
+                    'error' => 'An unexpected error occurred while deleting the list',
+                    'errorType' => 'INTERNAL_SERVER_ERROR',
+                    'statusCode' => 500
                 ];
             }
-
-            if (!$this->checkIfListBelongsToTheUser($id, $userId)) {
-                return [
-                    'success' => false,
-                    'error' => 'Access denied',
-                    'statusCode' => 403
-                ];
-            }
-
-            $data = $this->repository->deleteList($id, $userId);
-            return [
-                'success' => true,
-                'data' => $data,
-                'statusCode' => 200
-            ];
         }
 
         public function getLists($userId) {
-            $data = $this->repository->getLists($userId);
-            return [
-                'success' => true,
-                'data' => $data,
-                'statusCode' => 200
-            ];
+            try {
+                $data = $this->repository->getLists($userId);
+                return [
+                    'success' => true,
+                    'data' => $data,
+                    'statusCode' => 200
+                ];
+            } catch (\Exception $e) {
+                error_log('Unexpected error in getLists: ' . $e->getMessage());
+                return [
+                    'success' => false,
+                    'error' => 'An unexpected error occurred while fetching lists',
+                    'errorType' => 'INTERNAL_SERVER_ERROR',
+                    'statusCode' => 500
+                ];
+            }
         }
 
         public function getAllLists($userId) {
-            $data = $this->repository->getAllLists($userId);
-            return [
-                'success' => true,
-                'data' => $data,
-                'statusCode' => 200
-            ];
+            try {
+                $data = $this->repository->getAllLists($userId);
+                return [
+                    'success' => true,
+                    'data' => $data,
+                    'statusCode' => 200
+                ];
+            } catch (\Exception $e) {
+                error_log('Unexpected error in getAllLists: ' . $e->getMessage());
+                return [
+                    'success' => false,
+                    'error' => 'An unexpected error occurred while fetching public lists',
+                    'errorType' => 'INTERNAL_SERVER_ERROR',
+                    'statusCode' => 500
+                ];
+            }
         }
 
         public function checkIfListBelongsToTheUser($id, $userId) {
