@@ -144,7 +144,7 @@
                 if (!$userId) {
                     throw new YtdbException('User authentication required', 401, 'UNAUTHORIZED');
                 }
-
+    
                 $result = $this->service->getAllLists($userId);
                 return $this->sendResult($result);
                 
@@ -152,6 +152,29 @@
                 return $this->sendResult($e->toArray());
             } catch (\Exception $e) {
                 error_log('Unexpected error in getAllLists controller: ' . $e->getMessage());
+                return $this->sendResult([
+                    'success' => false,
+                    'error' => 'An unexpected error occurred',
+                    'errorType' => 'INTERNAL_SERVER_ERROR',
+                    'statusCode' => 500
+                ]);
+            }
+        }
+    
+        public function getListById($id) {
+            try {
+                $userId = $this->getUserIdFromToken();
+                if (!$userId) {
+                    throw new YtdbException('User authentication required', 401, 'UNAUTHORIZED');
+                }
+    
+                $result = $this->service->getListById($id, $userId);
+                return $this->sendResult($result);
+                
+            } catch (YtdbException $e) {
+                return $this->sendResult($e->toArray());
+            } catch (\Exception $e) {
+                error_log('Unexpected error in getListById controller: ' . $e->getMessage());
                 return $this->sendResult([
                     'success' => false,
                     'error' => 'An unexpected error occurred',

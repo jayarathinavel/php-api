@@ -179,7 +179,45 @@
                 ];
             }
         }
-
+    
+        public function getListById($id, $userId) {
+            try {
+                // Validate list ID
+                if (empty($id) || !is_numeric($id)) {
+                    throw new YtdbException('Invalid list ID', 400, 'INVALID_LIST_ID');
+                }
+    
+                $listData = $this->repository->getListById($id);
+                if ($listData === null) {
+                    throw new YtdbException('List not found', 404, 'LIST_NOT_FOUND');
+                }
+    
+                // Check if user can access this list (owner or public list)
+                $isOwner = $this->checkIfListBelongsToTheUser($id, $userId);
+                $isPublic = isset($listData['visibility']) && $listData['visibility'] === 'public';
+    
+                if (!$isOwner && !$isPublic) {
+                    throw new YtdbException('You do not have permission to view this list', 403, 'RESOURCE_NOT_ACCESSIBLE');
+                }
+    
+                return [
+                    'success' => true,
+                    'data' => $listData,
+                    'statusCode' => 200
+                ];
+            } catch (YtdbException $e) {
+                return $e->toArray();
+            } catch (\Exception $e) {
+                error_log('Unexpected error in getListById: ' . $e->getMessage());
+                return [
+                    'success' => false,
+                    'error' => 'An unexpected error occurred while fetching the list',
+                    'errorType' => 'INTERNAL_SERVER_ERROR',
+                    'statusCode' => 500
+                ];
+            }
+        }
+    
         public function checkIfListBelongsToTheUser($id, $userId) {
             return $this->repository->checkIfListBelongsToTheUser($id, $userId);
         }

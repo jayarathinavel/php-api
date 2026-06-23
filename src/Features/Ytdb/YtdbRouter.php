@@ -10,10 +10,11 @@
         public static function registerRoutes(Router $router) {
             $router->addRoute('POST', '/ytdb/lists', [YtdbListsController::class, 'createList'], 'user');
             $router->addRoute('GET', '/ytdb/lists', [YtdbListsController::class, 'getLists'], 'user');
+            $router->addRoute('GET', '/ytdb/lists/all', [YtdbListsController::class, 'getAllLists'], 'user');
+            $router->addRoute('GET', '/ytdb/lists/{id}', [YtdbListsController::class, 'getListById'], 'user');
             $router->addRoute('PUT', '/ytdb/lists/{id}', [YtdbListsController::class, 'updateList'], 'user');
             $router->addRoute('DELETE', '/ytdb/lists/{id}', [YtdbListsController::class, 'deleteList'], 'user');
-            $router->addRoute('GET', '/ytdb/lists/all', [YtdbListsController::class, 'getAllLists'], 'user');
-
+    
             $router->addRoute('POST', '/ytdb/videos', [YtdbVideosController::class, 'createVideo'], 'user');
             $router->addRoute('GET', '/ytdb/my-videos', [YtdbVideosController::class, 'getMyVideos'], 'user');
             $router->addRoute('GET', '/ytdb/all-videos', [YtdbVideosController::class, 'getAllVideos'], 'user');
