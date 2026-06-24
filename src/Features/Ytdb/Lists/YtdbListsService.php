@@ -232,9 +232,9 @@
             return $this->repository->checkIfListBelongsToTheUser($id, $userId);
         }
 
-        public function getCommunityUsers($appId, $limit = null) {
+        public function getCommunityUsers($appId, $userId, $limit = null) {
             try {
-                $data = $this->repository->getCommunityUsers($appId, $limit);
+                $data = $this->repository->getCommunityUsers($appId, $userId, $limit);
                 return [
                     'success' => true,
                     'data' => $data,

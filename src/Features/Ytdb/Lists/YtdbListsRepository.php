@@ -166,7 +166,7 @@
             }
         }
 
-        public function getCommunityUsers($appId, $limit = null) {
+        public function getCommunityUsers($appId, $userId, $limit = null) {
             try {
                 $sql = "SELECT
                             u.id,
@@ -178,7 +178,7 @@
                         FROM users u
                         LEFT JOIN " . self::TABLE_NAME . " l ON u.id = l.user_id AND l.visibility = 'public'
                         LEFT JOIN ytdb_videos v ON l.id = v.list_id
-                        WHERE u.app_id = :appId
+                        WHERE u.app_id = :appId AND u.id != :userId
                         GROUP BY u.id, u.name, u.email, u.created_at
                         ORDER BY u.created_at DESC";
                 
@@ -186,8 +186,8 @@
                     $sql .= " LIMIT :limit";
                 }
                 
-                $params = ['appId' => $appId];
-                $types = ['appId' => ParameterType::STRING];
+                $params = ['appId' => $appId, 'userId' => $userId];
+                $types = ['appId' => ParameterType::STRING, 'userId' => ParameterType::STRING];
                 
                 if ($limit !== null) {
                     $params['limit'] = (int)$limit;

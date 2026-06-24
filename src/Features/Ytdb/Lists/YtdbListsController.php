@@ -191,10 +191,16 @@
                     throw new YtdbException('App ID is required', 400, 'MISSING_APP_ID');
                 }
 
+                // Get current user ID to exclude from results
+                $userId = $this->getUserIdFromToken();
+                if (!$userId) {
+                    throw new YtdbException('User authentication required', 401, 'UNAUTHORIZED');
+                }
+
                 // Get limit from query parameter
                 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : null;
 
-                $result = $this->service->getCommunityUsers($appId, $limit);
+                $result = $this->service->getCommunityUsers($appId, $userId, $limit);
                 return $this->sendResult($result);
                 
             } catch (YtdbException $e) {
