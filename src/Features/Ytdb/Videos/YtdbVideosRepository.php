@@ -26,11 +26,26 @@
                     'created_at' => (new \DateTime())->format('Y-m-d H:i:s'),
                     'updated_at' => (new \DateTime())->format('Y-m-d H:i:s'),
                 ]);
-
+    
                 $id = $this->connection->lastInsertId();
                 $video->setId($id);
-
-                return $video;
+    
+                // Fetch the created video with list name and visibility
+                $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at,
+                               l.name AS list_name, l.visibility, u.name AS user_name
+                        FROM " . self::TABLE_NAME . " v
+                        JOIN ytdb_lists l ON v.list_id = l.id
+                        JOIN users u ON l.user_id = u.id
+                        WHERE v.id = :id";
+                $result = $this->connection->executeQuery($sql, ['id' => $id]);
+                $createdData = $result->fetchAssociative();
+                
+                if ($createdData) {
+                    $videos = $this->rowsToVideos([$createdData]);
+                    return $videos[0];
+                }
+                
+                return $video->toArray();
             } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
                 throw new YtdbException('This video already exists in the list', 409, 'DUPLICATE_ENTRY');
             } catch (\Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException $e) {
@@ -55,8 +70,23 @@
                     'description' => $video->getDescription(),
                     'updated_at' => (new \DateTime())->format('Y-m-d H:i:s'),
                 ], ['id' => $video->getId()]);
-
-                return $video;
+    
+                // Fetch the updated video with list name and visibility
+                $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at,
+                               l.name AS list_name, l.visibility, u.name AS user_name
+                        FROM " . self::TABLE_NAME . " v
+                        JOIN ytdb_lists l ON v.list_id = l.id
+                        JOIN users u ON l.user_id = u.id
+                        WHERE v.id = :id";
+                $result = $this->connection->executeQuery($sql, ['id' => $video->getId()]);
+                $updatedData = $result->fetchAssociative();
+                
+                if ($updatedData) {
+                    $videos = $this->rowsToVideos([$updatedData]);
+                    return $videos[0];
+                }
+                
+                return $video->toArray();
             } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
                 throw new YtdbException('This video already exists in the list', 409, 'DUPLICATE_ENTRY');
             } catch (\Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException $e) {

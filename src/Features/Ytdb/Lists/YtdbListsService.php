@@ -17,13 +17,13 @@
                 if (empty($data['name'])) {
                     throw new YtdbException('List name is required', 400, 'MISSING_REQUIRED_FIELD');
                 }
-
+    
                 // Validate visibility
                 $validVisibilities = ['public', 'private'];
                 if (isset($data['visibility']) && !in_array($data['visibility'], $validVisibilities)) {
                     throw new YtdbException('Invalid visibility value. Must be "public" or "private"', 400, 'INVALID_INPUT_FORMAT');
                 }
-
+    
                 $list = new YtdbLists(
                     null,
                     $userId,
@@ -34,10 +34,14 @@
                     null,
                     null
                 );
-                $data = $this->repository->createList($list);
+                $createdData = $this->repository->createList($list);
+                
+                // Handle both array and object responses
+                $responseData = is_array($createdData) ? $createdData : $createdData->toArray();
+                
                 return [
                     'success' => true,
-                    'data' => $data->toArray(),
+                    'data' => $responseData,
                     'statusCode' => 201
                 ];
             } catch (YtdbException $e) {
@@ -59,27 +63,27 @@
                 if (empty($id) || !is_numeric($id)) {
                     throw new YtdbException('Invalid list ID', 400, 'INVALID_LIST_ID');
                 }
-
+    
                 // Validate required fields
                 if (empty($data['name'])) {
                     throw new YtdbException('List name is required', 400, 'MISSING_REQUIRED_FIELD');
                 }
-
+    
                 // Validate visibility
                 $validVisibilities = ['public', 'private'];
                 if (isset($data['visibility']) && !in_array($data['visibility'], $validVisibilities)) {
                     throw new YtdbException('Invalid visibility value. Must be "public" or "private"', 400, 'INVALID_INPUT_FORMAT');
                 }
-
+    
                 $existingList = $this->repository->getListById($id);
                 if ($existingList === null) {
                     throw new YtdbException('List not found', 404, 'LIST_NOT_FOUND');
                 }
-
+    
                 if (!$this->checkIfListBelongsToTheUser($id, $userId)) {
                     throw new YtdbException('You do not have permission to update this list', 403, 'RESOURCE_NOT_OWNED');
                 }
-
+    
                 $list = new YtdbLists(
                     $id,
                     $userId,
@@ -90,10 +94,14 @@
                     null,
                     null
                 );
-                $data = $this->repository->updateList($list);
+                $updatedData = $this->repository->updateList($list);
+                
+                // Handle both array and object responses
+                $responseData = is_array($updatedData) ? $updatedData : $updatedData->toArray();
+                
                 return [
                     'success' => true,
-                    'data' => $data->toArray(),
+                    'data' => $responseData,
                     'statusCode' => 200
                 ];
             } catch (YtdbException $e) {

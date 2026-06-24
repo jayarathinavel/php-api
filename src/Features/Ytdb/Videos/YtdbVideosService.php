@@ -18,22 +18,22 @@
                 if (empty($data['link'])) {
                     throw new YtdbException('YouTube URL is required', 400, 'MISSING_REQUIRED_FIELD');
                 }
-
+    
                 if (empty($data['listId'])) {
                     throw new YtdbException('List ID is required', 400, 'MISSING_REQUIRED_FIELD');
                 }
-
+    
                 // Validate list ID format
                 if (!is_numeric($data['listId'])) {
                     throw new YtdbException('Invalid list ID format', 400, 'INVALID_LIST_ID');
                 }
-
+    
                 $apiKey = getenv('YOUTUBE_API_KEY');
                 
                 if (empty($apiKey)) {
                     throw new YtdbException('YouTube API is not configured. Please contact the administrator', 500, 'MISSING_API_KEY');
                 }
-
+    
                 $ytdbUtils = new YtdbUtils($apiKey);
                 
                 // Extract video ID from URL
@@ -41,7 +41,7 @@
                 
                 // Use optimized method to get all info in one API call
                 $videoInfo = $ytdbUtils->getVideoInfo($videoID);
-
+    
                 $video = new YtdbVideos(
                     null,
                     $data['link'],
@@ -56,9 +56,12 @@
                 
                 $createdVideo = $this->repository->createVideo($video);
                 
+                // Handle both array and object responses
+                $responseData = is_array($createdVideo) ? $createdVideo : $createdVideo->toArray();
+                
                 return [
                     'success' => true,
-                    'data' => $createdVideo->toArray(),
+                    'data' => $responseData,
                     'statusCode' => 201
                 ];
             } catch (YtdbException $e) {
@@ -80,16 +83,16 @@
                 if (empty($id) || !is_numeric($id)) {
                     throw new YtdbException('Invalid video ID', 400, 'INVALID_VIDEO_ID');
                 }
-
+    
                 $existingVideo = $this->repository->getVideoById($id);
                 if ($existingVideo === null) {
                     throw new YtdbException('Video not found', 404, 'VIDEO_NOT_FOUND');
                 }
-
+    
                 if (!$this->checkIfVideoBelongsToTheUser($id, $userId)) {
                     throw new YtdbException('You do not have permission to update this video', 403, 'RESOURCE_NOT_OWNED');
                 }
-
+    
                 // If link is being updated, fetch new video info from YouTube
                 if (isset($data['link']) && $data['link'] !== $existingVideo['link']) {
                     $apiKey = getenv('YOUTUBE_API_KEY');
@@ -97,7 +100,7 @@
                     if (empty($apiKey)) {
                         throw new YtdbException('YouTube API is not configured. Please contact the administrator', 500, 'MISSING_API_KEY');
                     }
-
+    
                     $ytdbUtils = new YtdbUtils($apiKey);
                     $videoID = $ytdbUtils->getVideoId($data['link']);
                     $videoInfo = $ytdbUtils->getVideoInfo($videoID);
@@ -107,7 +110,7 @@
                     $data['duration'] = $videoInfo['duration'];
                     $data['thumbnailUrl'] = $videoInfo['thumbnail'];
                 }
-
+    
                 $video = new YtdbVideos(
                     $id,
                     $data['link'] ?? $existingVideo['link'],
@@ -119,12 +122,15 @@
                     null,
                     null
                 );
-
+    
                 $updatedVideo = $this->repository->updateVideo($video);
-
+    
+                // Handle both array and object responses
+                $responseData = is_array($updatedVideo) ? $updatedVideo : $updatedVideo->toArray();
+    
                 return [
                     'success' => true,
-                    'data' => $updatedVideo->toArray(),
+                    'data' => $responseData,
                     'statusCode' => 200
                 ];
             } catch (YtdbException $e) {

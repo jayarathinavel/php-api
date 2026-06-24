@@ -26,11 +26,20 @@
                     'created_at' => (new \DateTime())->format('Y-m-d H:i:s'),
                     'updated_at' => (new \DateTime())->format('Y-m-d H:i:s'),
                 ]);
-
+    
                 $id = $this->connection->lastInsertId();
                 $list->setId($id);
-
-                return $list;
+    
+                // Fetch the created list with video count (will be 0 for new lists)
+                $sql = "SELECT l.*, COUNT(v.id) as video_count
+                        FROM " . self::TABLE_NAME . " l
+                        LEFT JOIN ytdb_videos v ON l.id = v.list_id
+                        WHERE l.id = :id
+                        GROUP BY l.id";
+                $result = $this->connection->executeQuery($sql, ['id' => $id]);
+                $createdData = $result->fetchAssociative();
+                
+                return $createdData ?: $list;
             } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
                 throw new YtdbException('A list with this name already exists', 409, 'DUPLICATE_ENTRY');
             } catch (\Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException $e) {
@@ -53,8 +62,17 @@
                     'visibility' => $list->getVisibility(),
                     'updated_at' => (new \DateTime())->format('Y-m-d H:i:s'),
                 ], ['id' => $list->getId()]);
-
-                return $list;
+    
+                // Fetch the updated list with video count
+                $sql = "SELECT l.*, COUNT(v.id) as video_count
+                        FROM " . self::TABLE_NAME . " l
+                        LEFT JOIN ytdb_videos v ON l.id = v.list_id
+                        WHERE l.id = :id
+                        GROUP BY l.id";
+                $result = $this->connection->executeQuery($sql, ['id' => $list->getId()]);
+                $updatedData = $result->fetchAssociative();
+                
+                return $updatedData ?: $list;
             } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
                 throw new YtdbException('A list with this name already exists', 409, 'DUPLICATE_ENTRY');
             } catch (\Doctrine\DBAL\Exception\ConnectionException $e) {
