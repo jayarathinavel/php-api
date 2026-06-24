@@ -7,15 +7,17 @@
         private $userId;
         private $name;
         private $description;
+        private $emoji;
         private $visibility; // 'public', 'private'
         private $createdAt;
         private $updatedAt;
 
-        public function __construct($id, $userId, $name, $description, $visibility, $createdAt, $updatedAt) {
+        public function __construct($id, $userId, $name, $description, $emoji, $visibility, $createdAt, $updatedAt) {
             $this->id = $id;
             $this->userId = $userId;
             $this->name = $name;
             $this->description = $description;
+            $this->emoji = $emoji ?? '📋';
             $this->visibility = $visibility;
             $this->createdAt = $createdAt ?? new \DateTime();
             $this->updatedAt = $updatedAt ?? new \DateTime();
@@ -53,6 +55,14 @@
             $this->description = $description;
         }
 
+        public function getEmoji() {
+            return $this->emoji;
+        }
+
+        public function setEmoji($emoji) {
+            $this->emoji = $emoji;
+        }
+
         public function getVisibility() {
             return $this->visibility;
         }
@@ -83,6 +93,7 @@
                 'userId' => $this->userId,
                 'name' => $this->name,
                 'description' => $this->description,
+                'emoji' => $this->emoji,
                 'visibility' => $this->visibility,
                 'createdAt' => $this->createdAt ? $this->createdAt->format('Y-m-d H:i:s') : null,
                 'updatedAt' => $this->updatedAt ? $this->updatedAt->format('Y-m-d H:i:s') : null,
@@ -95,6 +106,7 @@
                 $data['userId'],
                 $data['name'],
                 $data['description'],
+                $data['emoji'] ?? '📋',
                 $data['visibility'],
                 isset($data['createdAt']) ? new \DateTime($data['createdAt']) : null,
                 isset($data['updatedAt']) ? new \DateTime($data['updatedAt']) : null

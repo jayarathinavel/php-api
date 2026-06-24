@@ -29,6 +29,7 @@
                     $userId,
                     $data['name'],
                     $data['description'] ?? null,
+                    $data['emoji'] ?? '📋',
                     $data['visibility'] ?? 'private',
                     null,
                     null
@@ -84,6 +85,7 @@
                     $userId,
                     $data['name'],
                     $data['description'] ?? null,
+                    $data['emoji'] ?? '📋',
                     $data['visibility'] ?? 'private',
                     null,
                     null

@@ -21,6 +21,7 @@
                     'user_id' => $list->getUserId(),
                     'name' => $list->getName(),
                     'description' => $list->getDescription(),
+                    'emoji' => $list->getEmoji(),
                     'visibility' => $list->getVisibility(),
                     'created_at' => (new \DateTime())->format('Y-m-d H:i:s'),
                     'updated_at' => (new \DateTime())->format('Y-m-d H:i:s'),
@@ -48,6 +49,7 @@
                 $this->connection->update(self::TABLE_NAME, [
                     'name' => $list->getName(),
                     'description' => $list->getDescription(),
+                    'emoji' => $list->getEmoji(),
                     'visibility' => $list->getVisibility(),
                     'updated_at' => (new \DateTime())->format('Y-m-d H:i:s'),
                 ], ['id' => $list->getId()]);
