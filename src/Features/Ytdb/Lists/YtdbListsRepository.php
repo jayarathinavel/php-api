@@ -3,6 +3,7 @@
     namespace Features\Ytdb\Lists;
 
     use Core\Database;
+    use Doctrine\DBAL\ParameterType;
     use Features\Ytdb\YtdbException;
 
     class YtdbListsRepository {
@@ -142,6 +143,45 @@
             } catch (\Exception $e) {
                 error_log('Database error in getListById: ' . $e->getMessage());
                 throw new YtdbException('Failed to fetch list', 500, 'DATABASE_ERROR');
+            }
+        }
+
+        public function getCommunityUsers($appId, $limit = null) {
+            try {
+                $sql = "SELECT
+                            u.id,
+                            u.name,
+                            u.email,
+                            u.created_at,
+                            COUNT(DISTINCT l.id) as list_count,
+                            COUNT(DISTINCT v.id) as video_count
+                        FROM users u
+                        LEFT JOIN " . self::TABLE_NAME . " l ON u.id = l.user_id AND l.visibility = 'public'
+                        LEFT JOIN ytdb_videos v ON l.id = v.list_id
+                        WHERE u.app_id = :appId
+                        GROUP BY u.id, u.name, u.email, u.created_at
+                        ORDER BY u.created_at DESC";
+                
+                if ($limit !== null) {
+                    $sql .= " LIMIT :limit";
+                }
+                
+                $params = ['appId' => $appId];
+                $types = ['appId' => ParameterType::STRING];
+                
+                if ($limit !== null) {
+                    $params['limit'] = (int)$limit;
+                    $types['limit'] = ParameterType::INTEGER;
+                }
+                
+                $result = $this->connection->executeQuery($sql, $params, $types);
+                return $result->fetchAllAssociative();
+            } catch (\Doctrine\DBAL\Exception\ConnectionException $e) {
+                error_log('Database connection error in getCommunityUsers: ' . $e->getMessage());
+                throw new YtdbException('Database connection failed', 500, 'DATABASE_CONNECTION_ERROR');
+            } catch (\Exception $e) {
+                error_log('Database error in getCommunityUsers: ' . $e->getMessage());
+                throw new YtdbException('Failed to fetch community users', 500, 'DATABASE_ERROR');
             }
         }
     }

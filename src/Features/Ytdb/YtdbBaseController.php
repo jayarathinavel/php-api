@@ -14,6 +14,21 @@
         }
 
         /**
+         * Extract App ID from headers
+         * @return string|null App ID
+         */
+        protected function getAppId() {
+            $headers = getallheaders();
+            if (isset($headers['X-App-Id'])) {
+                return $headers['X-App-Id'];
+            }
+            if (isset($headers['x-app-id'])) {
+                return $headers['x-app-id'];
+            }
+            return null;
+        }
+
+        /**
          * Extract and validate user ID from JWT token
          * @throws YtdbException if token is missing, invalid, or expired
          * @return int User ID

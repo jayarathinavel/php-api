@@ -221,4 +221,25 @@
         public function checkIfListBelongsToTheUser($id, $userId) {
             return $this->repository->checkIfListBelongsToTheUser($id, $userId);
         }
+
+        public function getCommunityUsers($appId, $limit = null) {
+            try {
+                $data = $this->repository->getCommunityUsers($appId, $limit);
+                return [
+                    'success' => true,
+                    'data' => $data,
+                    'statusCode' => 200
+                ];
+            } catch (YtdbException $e) {
+                return $e->toArray();
+            } catch (\Exception $e) {
+                error_log('Unexpected error in getCommunityUsers: ' . $e->getMessage());
+                return [
+                    'success' => false,
+                    'error' => 'An unexpected error occurred while fetching community users',
+                    'errorType' => 'INTERNAL_SERVER_ERROR',
+                    'statusCode' => 500
+                ];
+            }
+        }
     }

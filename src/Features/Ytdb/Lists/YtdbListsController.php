@@ -183,5 +183,31 @@
                 ]);
             }
         }
+
+        public function getCommunityUsers() {
+            try {
+                $appId = $this->getAppId();
+                if (!$appId) {
+                    throw new YtdbException('App ID is required', 400, 'MISSING_APP_ID');
+                }
+
+                // Get limit from query parameter
+                $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : null;
+
+                $result = $this->service->getCommunityUsers($appId, $limit);
+                return $this->sendResult($result);
+                
+            } catch (YtdbException $e) {
+                return $this->sendResult($e->toArray());
+            } catch (\Exception $e) {
+                error_log('Unexpected error in getCommunityUsers controller: ' . $e->getMessage());
+                return $this->sendResult([
+                    'success' => false,
+                    'error' => 'An unexpected error occurred',
+                    'errorType' => 'INTERNAL_SERVER_ERROR',
+                    'statusCode' => 500
+                ]);
+            }
+        }
         
     }
