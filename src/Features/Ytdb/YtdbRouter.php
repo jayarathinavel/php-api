@@ -5,6 +5,7 @@
     use Core\Router;
     use Features\Ytdb\Lists\YtdbListsController;
     use Features\Ytdb\Videos\YtdbVideosController;
+    use Features\Ytdb\Users\YtdbUsersController;
 
     class YtdbRouter {
         public static function registerRoutes(Router $router) {
@@ -24,6 +25,10 @@
             $router->addRoute('GET', '/ytdb/video/{id}', [YtdbVideosController::class, 'getVideoById'], 'user');
             $router->addRoute('PUT', '/ytdb/videos/{id}', [YtdbVideosController::class, 'updateVideo'], 'user');
             $router->addRoute('DELETE', '/ytdb/videos/{id}', [YtdbVideosController::class, 'deleteVideo'], 'user');
+
+            // Users routes
+            $router->addRoute('GET', '/ytdb/users/profile', [YtdbUsersController::class, 'getProfile'], 'user');
+            $router->addRoute('PUT', '/ytdb/users/profile', [YtdbUsersController::class, 'updateProfile'], 'user');
 
             // Community users route
             $router->addRoute('GET', '/ytdb/community-users', [YtdbListsController::class, 'getCommunityUsers'], 'user');
