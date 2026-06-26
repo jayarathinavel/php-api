@@ -6,27 +6,39 @@ use Core\Database;
 
 class YtdbUsersRepository {
     private $connection;
+    private $avatarRepository;
 
     public function __construct() {
         $this->connection = Database::getInstance()->getConnection();
+        $this->avatarRepository = new YtdbUsersAvatarRepository();
     }
 
     /**
-     * Find a ytdb user by ID
+     * Find a ytdb user by ID with avatar_id
      * Only returns users with app_id = 'ytdb'
      */
     public function findById($userId) {
         $queryBuilder = $this->connection->createQueryBuilder();
         $result = $queryBuilder
-            ->select('id', 'name', 'email', 'role', 'created_at', 'updated_at')
-            ->from('users')
-            ->where('id = :id')
-            ->andWhere('app_id = :app_id')
+            ->select('u.id', 'u.name', 'u.email', 'u.role', 'u.created_at', 'u.updated_at', 'yu.avatar_id')
+            ->from('users', 'u')
+            ->leftJoin('u', 'ytdb_users', 'yu', 'u.id = yu.user_id')
+            ->where('u.id = :id')
+            ->andWhere('u.app_id = :app_id')
             ->setParameter('id', $userId)
             ->setParameter('app_id', 'ytdb')
             ->executeQuery();
 
-        return $result->fetchAssociative();
+        $user = $result->fetchAssociative();
+        
+        // Ensure ytdb_users record exists for this user
+        if ($user && !array_key_exists('avatar_id', $user)) {
+            $this->avatarRepository->getOrCreate($userId);
+            // Re-fetch to get the created record
+            return $this->findById($userId);
+        }
+
+        return $user;
     }
 
     /**

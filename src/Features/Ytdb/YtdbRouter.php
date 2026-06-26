@@ -29,6 +29,7 @@
             // Users routes
             $router->addRoute('GET', '/ytdb/users/profile', [YtdbUsersController::class, 'getProfile'], 'user');
             $router->addRoute('PUT', '/ytdb/users/profile', [YtdbUsersController::class, 'updateProfile'], 'user');
+            $router->addRoute('PUT', '/ytdb/users/avatar', [YtdbUsersController::class, 'updateAvatar'], 'user');
 
             // Community users route
             $router->addRoute('GET', '/ytdb/community-users', [YtdbListsController::class, 'getCommunityUsers'], 'user');

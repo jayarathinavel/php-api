@@ -14,9 +14,10 @@
         private $updatedAt;
         private $listName;
         private $userName;
+        private $userAvatarId;
         private $visibility;
 
-        public function __construct($id, $link, $title, $duration, $thumbnailUrl, $listId, $description, $createdAt, $updatedAt, $listName = null, $userName = null, $visibility = null) {
+    public function __construct($id, $link, $title, $duration, $thumbnailUrl, $listId, $description, $createdAt, $updatedAt, $listName = null, $userName = null, $visibility = null, $userAvatarId = null) {
             $this->id = $id;
             $this->link = $link;
             $this->title = $title;
@@ -28,6 +29,7 @@
             $this->updatedAt = $updatedAt ?? new \DateTime();
             $this->listName = $listName;
             $this->userName = $userName;
+            $this->userAvatarId = $userAvatarId;
             $this->visibility = $visibility;
         }
 
@@ -119,6 +121,14 @@
             $this->userName = $userName;
         }
 
+        public function getUserAvatarId() {
+            return $this->userAvatarId;
+        }
+
+        public function setUserAvatarId($userAvatarId) {
+            $this->userAvatarId = $userAvatarId;
+        }
+
         public function getVisibility() {
             return $this->visibility;
         }
@@ -160,6 +170,10 @@
                 $payload['userName'] = $this->userName;
             }
 
+            if ($this->userAvatarId !== null) {
+                $payload['userAvatarId'] = $this->userAvatarId;
+            }
+
             if ($this->visibility !== null) {
                 $payload['visibility'] = $this->visibility;
             }
@@ -180,7 +194,8 @@
                 isset($data['updatedAt']) ? new \DateTime($data['updatedAt']) : null,
                 $data['listName'] ?? null,
                 $data['userName'] ?? null,
-                $data['visibility'] ?? null
+                $data['visibility'] ?? null,
+                $data['userAvatarId'] ?? null
             );
         }
     }

@@ -30,7 +30,7 @@ class YtdbUsersController extends YtdbBaseController {
     }
 
     /**
-     * Update user profile (name only)
+     * Update user profile (name and/or avatar_id)
      * PUT /ytdb/users/profile
      */
     public function updateProfile() {
@@ -39,6 +39,33 @@ class YtdbUsersController extends YtdbBaseController {
             $data = $this->getRequestData();
 
             $result = $this->service->updateProfile($userId, $data);
+            $this->sendJsonResponse($result, 200);
+        } catch (YtdbException $e) {
+            $this->sendJsonResponse([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], $e->getCode());
+        } catch (\Exception $e) {
+            $this->sendJsonResponse([
+                'success' => false,
+                'message' => 'An unexpected error occurred: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update user avatar
+     * PUT /ytdb/users/avatar
+     */
+    public function updateAvatar() {
+        try {
+            $userId = $this->getUserIdFromToken();
+            $data = $this->getRequestData();
+
+            // Only pass avatar_id to the service
+            $avatarData = ['avatar_id' => $data['avatar_id'] ?? null];
+            
+            $result = $this->service->updateProfile($userId, $avatarData);
             $this->sendJsonResponse($result, 200);
         } catch (YtdbException $e) {
             $this->sendJsonResponse([

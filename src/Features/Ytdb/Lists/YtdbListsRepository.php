@@ -120,12 +120,13 @@
 
         public function getAllLists($userId){
             try {
-                $sql = "SELECT l.*, u.name AS user_name, COUNT(v.id) as video_count
+                $sql = "SELECT l.*, u.name AS user_name, yu.avatar_id AS user_avatar_id, COUNT(v.id) as video_count
                         FROM " . self::TABLE_NAME . " l
                         JOIN users u ON l.user_id = u.id
+                        LEFT JOIN ytdb_users yu ON u.id = yu.user_id
                         LEFT JOIN ytdb_videos v ON l.id = v.list_id
                         WHERE l.visibility = 'public' AND l.user_id != :userId
-                        GROUP BY l.id";
+                        GROUP BY l.id, u.name, yu.avatar_id";
                 $result = $this->connection->executeQuery($sql, ['userId' => $userId]);
                 return $result->fetchAllAssociative();
             } catch (\Doctrine\DBAL\Exception\ConnectionException $e) {
@@ -173,13 +174,15 @@
                             u.name,
                             u.email,
                             u.created_at,
+                            yu.avatar_id,
                             COUNT(DISTINCT l.id) as list_count,
                             COUNT(DISTINCT v.id) as video_count
                         FROM users u
+                        LEFT JOIN ytdb_users yu ON u.id = yu.user_id
                         LEFT JOIN " . self::TABLE_NAME . " l ON u.id = l.user_id AND l.visibility = 'public'
                         LEFT JOIN ytdb_videos v ON l.id = v.list_id
                         WHERE u.app_id = :appId AND u.id != :userId
-                        GROUP BY u.id, u.name, u.email, u.created_at
+                        GROUP BY u.id, u.name, u.email, u.created_at, yu.avatar_id
                         ORDER BY u.created_at DESC";
                 
                 if ($limit !== null) {

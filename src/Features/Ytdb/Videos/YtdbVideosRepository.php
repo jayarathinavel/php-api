@@ -30,12 +30,13 @@
                 $id = $this->connection->lastInsertId();
                 $video->setId($id);
     
-                // Fetch the created video with list name and visibility
+                // Fetch the created video with list name, visibility, and user avatar
                 $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at,
-                               l.name AS list_name, l.visibility, u.name AS user_name
+                               l.name AS list_name, l.visibility, u.name AS user_name, yu.avatar_id AS user_avatar_id
                         FROM " . self::TABLE_NAME . " v
                         JOIN ytdb_lists l ON v.list_id = l.id
                         JOIN users u ON l.user_id = u.id
+                        LEFT JOIN ytdb_users yu ON u.id = yu.user_id
                         WHERE v.id = :id";
                 $result = $this->connection->executeQuery($sql, ['id' => $id]);
                 $createdData = $result->fetchAssociative();
@@ -71,12 +72,13 @@
                     'updated_at' => (new \DateTime())->format('Y-m-d H:i:s'),
                 ], ['id' => $video->getId()]);
     
-                // Fetch the updated video with list name and visibility
+                // Fetch the updated video with list name, visibility, and user avatar
                 $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at,
-                               l.name AS list_name, l.visibility, u.name AS user_name
+                               l.name AS list_name, l.visibility, u.name AS user_name, yu.avatar_id AS user_avatar_id
                         FROM " . self::TABLE_NAME . " v
                         JOIN ytdb_lists l ON v.list_id = l.id
                         JOIN users u ON l.user_id = u.id
+                        LEFT JOIN ytdb_users yu ON u.id = yu.user_id
                         WHERE v.id = :id";
                 $result = $this->connection->executeQuery($sql, ['id' => $video->getId()]);
                 $updatedData = $result->fetchAssociative();
@@ -115,10 +117,11 @@
 
         public function getMyVideos($userId) {
             try {
-                $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at, l.name AS list_name, u.name AS user_name
+                $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at, l.name AS list_name, u.name AS user_name, yu.avatar_id AS user_avatar_id
                         FROM " . self::TABLE_NAME . " v
                         JOIN ytdb_lists l ON v.list_id = l.id
                         JOIN users u ON l.user_id = u.id
+                        LEFT JOIN ytdb_users yu ON u.id = yu.user_id
                         WHERE l.user_id = :userId
                         ORDER BY v.created_at DESC";
 
@@ -137,10 +140,11 @@
         public function getAllVideos($userId) {
             try {
                 $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at,
-                                 l.name AS list_name, u.name AS user_name
+                                 l.name AS list_name, u.name AS user_name, yu.avatar_id AS user_avatar_id
                         FROM " . self::TABLE_NAME . " v
                         JOIN ytdb_lists l ON v.list_id = l.id
                         JOIN users u ON l.user_id = u.id
+                        LEFT JOIN ytdb_users yu ON u.id = yu.user_id
                         WHERE l.visibility = 'public'
                           AND l.user_id != :userId
                         ORDER BY v.created_at DESC";
@@ -160,10 +164,11 @@
         public function getAllVideosByListId($listId, $userId) {
             try {
                 $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at,
-                                 l.name AS list_name, l.visibility, u.name AS user_name
+                                 l.name AS list_name, l.visibility, u.name AS user_name, yu.avatar_id AS user_avatar_id
                         FROM " . self::TABLE_NAME . " v
                         JOIN ytdb_lists l ON v.list_id = l.id
                         JOIN users u ON l.user_id = u.id
+                        LEFT JOIN ytdb_users yu ON u.id = yu.user_id
                         WHERE v.list_id = :listId
                           AND (l.visibility = 'public' OR l.user_id = :userId)
                         ORDER BY v.created_at DESC";
@@ -227,7 +232,8 @@
                     $row['updated_at'],
                     $row['list_name'] ?? null,
                     $row['user_name'] ?? null,
-                    $row['visibility'] ?? null
+                    $row['visibility'] ?? null,
+                    $row['user_avatar_id'] ?? null
                 ))->toArray();
             }
             return $videos;
