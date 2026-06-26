@@ -151,7 +151,11 @@
 
         public function getListById($id) {
             try {
-                $sql = "SELECT * FROM " . self::TABLE_NAME . " WHERE id = :id";
+                $sql = "SELECT l.*, u.name AS user_name, yu.avatar_id AS user_avatar_id
+                        FROM " . self::TABLE_NAME . " l
+                        JOIN users u ON l.user_id = u.id
+                        LEFT JOIN ytdb_users yu ON u.id = yu.user_id
+                        WHERE l.id = :id";
                 $result = $this->connection->executeQuery($sql, ['id' => $id]);
                 $rows = $result->fetchAllAssociative();
                 if (count($rows) === 0) {
