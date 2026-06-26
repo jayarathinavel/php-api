@@ -49,3 +49,51 @@ CREATE TABLE IF NOT EXISTS `workTracker_worklogs` (
   PRIMARY KEY (`id`)
 );
 
+
+-- Create ytdb_lists table for YTDB feature
+
+CREATE TABLE `ytdb_lists` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `emoji` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT 0xF09F938B,
+  `visibility` enum('public','private') COLLATE utf8mb4_unicode_ci DEFAULT 'private',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_visibility` (`visibility`),
+  CONSTRAINT `fk_ytdb_lists_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+);
+
+-- Create ytdb_videos table for YTDB feature
+
+CREATE TABLE `ytdb_videos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `list_id` int NOT NULL,
+  `link` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `duration` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `thumbnail_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_list_id` (`list_id`),
+  KEY `idx_link` (`link`(255)),
+  CONSTRAINT `fk_ytdb_videos_list` FOREIGN KEY (`list_id`) REFERENCES `ytdb_lists` (`id`) ON DELETE CASCADE
+
+-- Create ytdb_users table for YTDB user-specific data (avatars, preferences, etc.)
+
+CREATE TABLE `ytdb_users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `avatar_id` int DEFAULT NULL COMMENT 'Avatar image ID (1-20) or NULL for initial letter',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_user_id` (`user_id`),
+  CONSTRAINT `fk_ytdb_users_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `chk_avatar_id` CHECK ((`avatar_id` IS NULL OR (`avatar_id` >= 1 AND `avatar_id` <= 20)))
+);
