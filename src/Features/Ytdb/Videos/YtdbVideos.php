@@ -14,10 +14,11 @@
         private $updatedAt;
         private $listName;
         private $userName;
+        private $userId;
         private $userAvatarId;
         private $visibility;
 
-    public function __construct($id, $link, $title, $duration, $thumbnailUrl, $listId, $description, $createdAt, $updatedAt, $listName = null, $userName = null, $visibility = null, $userAvatarId = null) {
+    public function __construct($id, $link, $title, $duration, $thumbnailUrl, $listId, $description, $createdAt, $updatedAt, $listName = null, $userName = null, $visibility = null, $userAvatarId = null, $userId = null) {
             $this->id = $id;
             $this->link = $link;
             $this->title = $title;
@@ -29,6 +30,7 @@
             $this->updatedAt = $updatedAt ?? new \DateTime();
             $this->listName = $listName;
             $this->userName = $userName;
+            $this->userId = $userId;
             $this->userAvatarId = $userAvatarId;
             $this->visibility = $visibility;
         }
@@ -121,6 +123,14 @@
             $this->userName = $userName;
         }
 
+        public function getUserId() {
+            return $this->userId;
+        }
+
+        public function setUserId($userId) {
+            $this->userId = $userId;
+        }
+
         public function getUserAvatarId() {
             return $this->userAvatarId;
         }
@@ -168,6 +178,10 @@
 
             if ($this->userName !== null) {
                 $payload['userName'] = $this->userName;
+            }
+
+            if ($this->userId !== null) {
+                $payload['userId'] = $this->userId;
             }
 
             if ($this->userAvatarId !== null) {

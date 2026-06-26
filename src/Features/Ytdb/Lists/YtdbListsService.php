@@ -232,6 +232,39 @@
             return $this->repository->checkIfListBelongsToTheUser($id, $userId);
         }
 
+        public function getUserPublicLists($targetUserId) {
+            try {
+                if (empty($targetUserId) || !is_numeric($targetUserId)) {
+                    throw new YtdbException('Invalid user ID', 400, 'INVALID_USER_ID');
+                }
+
+                $profile = $this->repository->getUserPublicProfile($targetUserId);
+                if (!$profile) {
+                    throw new YtdbException('User not found', 404, 'USER_NOT_FOUND');
+                }
+
+                $lists = $this->repository->getPublicListsByUserId($targetUserId);
+                return [
+                    'success' => true,
+                    'data' => [
+                        'user' => $profile,
+                        'lists' => $lists,
+                    ],
+                    'statusCode' => 200
+                ];
+            } catch (YtdbException $e) {
+                return $e->toArray();
+            } catch (\Exception $e) {
+                error_log('Unexpected error in getUserPublicLists: ' . $e->getMessage());
+                return [
+                    'success' => false,
+                    'error' => 'An unexpected error occurred while fetching user public lists',
+                    'errorType' => 'INTERNAL_SERVER_ERROR',
+                    'statusCode' => 500
+                ];
+            }
+        }
+
         public function getCommunityUsers($appId, $userId, $limit = null) {
             try {
                 $data = $this->repository->getCommunityUsers($appId, $userId, $limit);

@@ -32,7 +32,7 @@
     
                 // Fetch the created video with list name, visibility, and user avatar
                 $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at,
-                               l.name AS list_name, l.visibility, u.name AS user_name, yu.avatar_id AS user_avatar_id
+                               l.name AS list_name, l.visibility, u.id AS user_id, u.name AS user_name, yu.avatar_id AS user_avatar_id
                         FROM " . self::TABLE_NAME . " v
                         JOIN ytdb_lists l ON v.list_id = l.id
                         JOIN users u ON l.user_id = u.id
@@ -74,7 +74,7 @@
     
                 // Fetch the updated video with list name, visibility, and user avatar
                 $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at,
-                               l.name AS list_name, l.visibility, u.name AS user_name, yu.avatar_id AS user_avatar_id
+                               l.name AS list_name, l.visibility, u.id AS user_id, u.name AS user_name, yu.avatar_id AS user_avatar_id
                         FROM " . self::TABLE_NAME . " v
                         JOIN ytdb_lists l ON v.list_id = l.id
                         JOIN users u ON l.user_id = u.id
@@ -117,7 +117,7 @@
 
         public function getMyVideos($userId) {
             try {
-                $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at, l.name AS list_name, u.name AS user_name, yu.avatar_id AS user_avatar_id
+                $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at, l.name AS list_name, u.id AS user_id, u.name AS user_name, yu.avatar_id AS user_avatar_id
                         FROM " . self::TABLE_NAME . " v
                         JOIN ytdb_lists l ON v.list_id = l.id
                         JOIN users u ON l.user_id = u.id
@@ -140,7 +140,7 @@
         public function getAllVideos($userId) {
             try {
                 $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at,
-                                 l.name AS list_name, u.name AS user_name, yu.avatar_id AS user_avatar_id
+                                 l.name AS list_name, u.id AS user_id, u.name AS user_name, yu.avatar_id AS user_avatar_id
                         FROM " . self::TABLE_NAME . " v
                         JOIN ytdb_lists l ON v.list_id = l.id
                         JOIN users u ON l.user_id = u.id
@@ -164,7 +164,7 @@
         public function getAllVideosByListId($listId, $userId) {
             try {
                 $sql = "SELECT v.id, v.link, v.title, v.duration, v.thumbnail_url, v.list_id, v.description, v.created_at, v.updated_at,
-                                 l.name AS list_name, l.visibility, u.name AS user_name, yu.avatar_id AS user_avatar_id
+                                 l.name AS list_name, l.visibility, u.id AS user_id, u.name AS user_name, yu.avatar_id AS user_avatar_id
                         FROM " . self::TABLE_NAME . " v
                         JOIN ytdb_lists l ON v.list_id = l.id
                         JOIN users u ON l.user_id = u.id
@@ -233,7 +233,8 @@
                     $row['list_name'] ?? null,
                     $row['user_name'] ?? null,
                     $row['visibility'] ?? null,
-                    $row['user_avatar_id'] ?? null
+                    $row['user_avatar_id'] ?? null,
+                    $row['user_id'] ?? null
                 ))->toArray();
             }
             return $videos;

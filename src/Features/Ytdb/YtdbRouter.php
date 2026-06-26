@@ -33,5 +33,8 @@
 
             // Community users route
             $router->addRoute('GET', '/ytdb/community-users', [YtdbListsController::class, 'getCommunityUsers'], 'user');
+
+            // User public profile + lists
+            $router->addRoute('GET', '/ytdb/users/{id}/public-lists', [YtdbListsController::class, 'getUserPublicLists'], 'user');
         }
     }

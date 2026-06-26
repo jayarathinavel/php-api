@@ -171,6 +171,44 @@
             }
         }
 
+        public function getPublicListsByUserId($targetUserId) {
+            try {
+                $sql = "SELECT l.*, u.name AS user_name, yu.avatar_id AS user_avatar_id, COUNT(v.id) as video_count
+                        FROM " . self::TABLE_NAME . " l
+                        JOIN users u ON l.user_id = u.id
+                        LEFT JOIN ytdb_users yu ON u.id = yu.user_id
+                        LEFT JOIN ytdb_videos v ON l.id = v.list_id
+                        WHERE l.visibility = 'public' AND l.user_id = :targetUserId
+                        GROUP BY l.id, u.name, yu.avatar_id
+                        ORDER BY l.created_at DESC";
+                $result = $this->connection->executeQuery($sql, ['targetUserId' => $targetUserId]);
+                return $result->fetchAllAssociative();
+            } catch (\Doctrine\DBAL\Exception\ConnectionException $e) {
+                error_log('Database connection error in getPublicListsByUserId: ' . $e->getMessage());
+                throw new YtdbException('Database connection failed', 500, 'DATABASE_CONNECTION_ERROR');
+            } catch (\Exception $e) {
+                error_log('Database error in getPublicListsByUserId: ' . $e->getMessage());
+                throw new YtdbException('Failed to fetch user public lists', 500, 'DATABASE_ERROR');
+            }
+        }
+
+        public function getUserPublicProfile($targetUserId) {
+            try {
+                $sql = "SELECT u.id, u.name, u.created_at, yu.avatar_id
+                        FROM users u
+                        LEFT JOIN ytdb_users yu ON u.id = yu.user_id
+                        WHERE u.id = :targetUserId AND u.app_id = 'ytdb'";
+                $result = $this->connection->executeQuery($sql, ['targetUserId' => $targetUserId]);
+                return $result->fetchAssociative() ?: null;
+            } catch (\Doctrine\DBAL\Exception\ConnectionException $e) {
+                error_log('Database connection error in getUserPublicProfile: ' . $e->getMessage());
+                throw new YtdbException('Database connection failed', 500, 'DATABASE_CONNECTION_ERROR');
+            } catch (\Exception $e) {
+                error_log('Database error in getUserPublicProfile: ' . $e->getMessage());
+                throw new YtdbException('Failed to fetch user profile', 500, 'DATABASE_ERROR');
+            }
+        }
+
         public function getCommunityUsers($appId, $userId, $limit = null) {
             try {
                 $sql = "SELECT

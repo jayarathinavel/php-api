@@ -184,6 +184,29 @@
             }
         }
 
+        public function getUserPublicLists($userId) {
+            try {
+                $requestingUserId = $this->getUserIdFromToken();
+                if (!$requestingUserId) {
+                    throw new YtdbException('User authentication required', 401, 'UNAUTHORIZED');
+                }
+
+                $result = $this->service->getUserPublicLists($userId);
+                return $this->sendResult($result);
+
+            } catch (YtdbException $e) {
+                return $this->sendResult($e->toArray());
+            } catch (\Exception $e) {
+                error_log('Unexpected error in getUserPublicLists controller: ' . $e->getMessage());
+                return $this->sendResult([
+                    'success' => false,
+                    'error' => 'An unexpected error occurred',
+                    'errorType' => 'INTERNAL_SERVER_ERROR',
+                    'statusCode' => 500
+                ]);
+            }
+        }
+
         public function getCommunityUsers() {
             try {
                 $appId = $this->getAppId();
