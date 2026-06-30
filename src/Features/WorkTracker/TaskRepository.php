@@ -95,4 +95,24 @@
             $this->connection->delete(self::TABLE_NAME, ['id' => $id, 'user_id' => $userId]);
             return true;
         }
+    
+        /**
+         * Find all tasks by user ID with comment counts
+         * This method efficiently fetches tasks with their comment counts in a single query
+         */
+        public function findAllByUserIdWithCommentCounts($userId) {
+            $queryBuilder = $this->connection->createQueryBuilder();
+            $results = $queryBuilder
+                ->select('t.*', 'COALESCE(COUNT(c.id), 0) as comment_count')
+                ->from(self::TABLE_NAME, 't')
+                ->leftJoin('t', 'workTracker_task_comments', 'c', 't.id = c.task_id')
+                ->where('t.user_id = ?')
+                ->setParameter(0, $userId)
+                ->groupBy('t.id', 't.user_id', 't.title', 't.description', 't.status', 't.reference', 't.created_at', 't.updated_at')
+                ->orderBy('t.created_at', 'DESC')
+                ->executeQuery()
+                ->fetchAllAssociative();
+    
+            return $results; // Return raw array with comment_count included
+        }
     }

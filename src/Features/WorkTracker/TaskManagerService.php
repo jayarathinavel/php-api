@@ -40,16 +40,20 @@
         }
 
         /**
-         * Get all tasks for a user
+         * Get all tasks for a user with comment counts
          */
         public function getAllByUserId($userId) {
-            $tasks = $this->repository->findAllByUserId($userId);
+            $tasksWithCounts = $this->repository->findAllByUserIdWithCommentCounts($userId);
 
             return [
                 'success' => true,
-                'data' => array_map(function($task) {
-                    return $task->toArray();
-                }, $tasks),
+                'data' => array_map(function($taskData) {
+                    $task = Task::fromArray($taskData);
+                    $taskArray = $task->toArray();
+                    // Add comment count to the response
+                    $taskArray['commentCount'] = (int) $taskData['comment_count'];
+                    return $taskArray;
+                }, $tasksWithCounts),
                 'statusCode' => 200
             ];
         }
