@@ -3,14 +3,17 @@
 
     use Firebase\JWT\JWT;
     use Firebase\JWT\Key;
+    use Core\Database;
 
     class AuthService {
         private $authRepository;
         private $jwtConfig;
+        private $connection;
 
         public function __construct() {
             $this->authRepository = new AuthRepository();
             $this->jwtConfig = require $_SERVER['DOCUMENT_ROOT'] . '/config/jwt.php';
+            $this->connection = Database::getInstance()->getConnection();
         }
 
         public function register($data, $appId) {
@@ -71,7 +74,22 @@
 
             $token = $this->generateJWT($user);
 
-            return ['success' => true, 'message' => 'Login successful', 'token' => $token, 'user' => $user->toArray()];
+            $userData = $user->toArray();
+
+            // Fetch avatar_id from ytdb_users for ytdb app users
+            if ($appId === 'ytdb') {
+                $qb = $this->connection->createQueryBuilder();
+                $result = $qb
+                    ->select('avatar_id')
+                    ->from('ytdb_users')
+                    ->where('user_id = :uid')
+                    ->setParameter('uid', $user->getId())
+                    ->executeQuery();
+                $row = $result->fetchAssociative();
+                $userData['avatar_id'] = $row ? $row['avatar_id'] : null;
+            }
+
+            return ['success' => true, 'message' => 'Login successful', 'token' => $token, 'user' => $userData];
         }
 
         private function generateJWT($user) {

@@ -23,6 +23,8 @@
         }
 
         public function handleRequest() {
+            //wait for 0.5 secs
+            usleep(500000);
             $method = $_SERVER['REQUEST_METHOD'];
             $path = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') ?: '/';
             

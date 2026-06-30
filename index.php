@@ -1,4 +1,31 @@
 <?php
+    // Suppress PHP warnings/notices/errors from leaking into JSON responses
+    ini_set('display_errors', '0');
+    ini_set('display_startup_errors', '0');
+    error_reporting(E_ALL);
+
+    // Catch fatal errors and return a clean JSON error instead of HTML
+    register_shutdown_function(function () {
+        $error = error_get_last();
+        if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+            if (!headers_sent()) {
+                header('Content-Type: application/json');
+                http_response_code(500);
+            }
+            // Flush any partial output that may have been written before the fatal
+            if (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+            echo json_encode([
+                'error' => 'An internal server error occurred',
+                'errorType' => 'FATAL_ERROR'
+            ]);
+        }
+    });
+
+    // Buffer output so we can discard partial content on fatal errors
+    ob_start();
+
     date_default_timezone_set('Asia/Kolkata');
 
     // CORS Headers
@@ -21,6 +48,7 @@
     use Features\Crud\CrudController;
     use Features\Users\UsersController;
     use Features\WorkTracker\WorkTrackerRouter;
+    use Features\Ytdb\YtdbRouter;
 
     // Handle base path for subdirectory deployments (e.g., serv00)
     $basePath = getenv('APP_BASE_PATH') ?: '';
@@ -31,6 +59,7 @@
     $router = new Router($basePath);
 
     // Register existing routes
+    $router->addRoute('GET', '/', [AuthController::class, 'apiCheck'], 'public');
     $router->addRoute('POST', '/register', [AuthController::class, 'register'], 'public');
     $router->addRoute('POST', '/login', [AuthController::class, 'login'], 'public');
     $router->addRoute('POST', '/users', [UsersController::class, 'createUser'], 'admin');
@@ -50,5 +79,8 @@
 
     // Register work_tracker app routes
     WorkTrackerRouter::registerRoutes($router);
+
+    // Register ytdb app routes
+    YtdbRouter::registerRoutes($router);
 
     $router->handleRequest();
