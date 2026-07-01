@@ -36,8 +36,21 @@ DB_DATABASE=api
 DB_USERNAME=root
 DB_PASSWORD=root
 DB_CHARSET=utf8mb4
-REGISTRATION_ENABLED=true
+REGISTRATION_DISABLED=
 ```
+
+### Registration control
+
+Use `REGISTRATION_DISABLED` to disable registration for specific apps. Set it to a comma-separated list of `app_id` values:
+
+```text
+# Disable registration for ytdb and worktracker only
+REGISTRATION_DISABLED=ytdb,worktracker
+```
+
+- If the variable is **absent or empty**, registration is enabled for all apps.
+- App IDs are matched case-insensitively.
+- Any app not listed remains enabled by default.
 
 ## Notes
 

@@ -17,7 +17,7 @@
         }
 
         public function register($data, $appId) {
-            if (!$this->isRegistrationEnabled()) {
+            if (!$this->isRegistrationEnabled($appId)) {
                 return ['success' => false, 'message' => "Registration is disabled"];
             }
 
@@ -48,14 +48,14 @@
             return ['success' => true, 'message' => 'User registered successfully', 'user' => $savedAuth->toArray()];
         }
 
-        private function isRegistrationEnabled() {
-            $envValue = getenv('REGISTRATION_ENABLED');
-            if ($envValue === false) {
+        private function isRegistrationEnabled($appId = null) {
+            $envValue = getenv('REGISTRATION_DISABLED');
+            if ($envValue === false || trim($envValue) === '') {
                 return true;
             }
 
-            $normalized = strtolower(trim($envValue));
-            return !in_array($normalized, ['0', 'false', 'no', 'off'], true);
+            $disabledApps = array_map('trim', explode(',', strtolower($envValue)));
+            return !in_array(strtolower($appId), $disabledApps, true);
         }
 
         public function login($data, $appId) {
