@@ -101,7 +101,7 @@ CREATE TABLE `ytdb_videos` (
   KEY `idx_list_id` (`list_id`),
   KEY `idx_link` (`link`(255)),
   CONSTRAINT `fk_ytdb_videos_list` FOREIGN KEY (`list_id`) REFERENCES `ytdb_lists` (`id`) ON DELETE CASCADE
-
+);
 -- Create ytdb_users table for YTDB user-specific data (avatars, preferences, etc.)
 
 CREATE TABLE `ytdb_users` (
