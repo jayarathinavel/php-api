@@ -28,8 +28,23 @@
 
     date_default_timezone_set('Asia/Kolkata');
 
-    // CORS Headers
-    header('Access-Control-Allow-Origin: *');
+    // CORS Headers - Secure configuration
+    $allowedOrigins = getenv('ALLOWED_ORIGINS') ?: '*';
+    
+    if ($allowedOrigins === '*') {
+        // Allow all origins (not recommended for production)
+        header('Access-Control-Allow-Origin: *');
+    } else {
+        // Validate origin against whitelist
+        $allowedOriginsList = array_map('trim', explode(',', $allowedOrigins));
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+        
+        if (in_array($origin, $allowedOriginsList, true)) {
+            header("Access-Control-Allow-Origin: $origin");
+            header('Access-Control-Allow-Credentials: true');
+        }
+    }
+    
     header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type, Authorization, X-App-Id');
     header('Access-Control-Max-Age: 3600');
@@ -43,7 +58,6 @@
     require __DIR__ . '/vendor/autoload.php';
 
     use Core\Router;
-    use Features\Admin\AdminQueryController;
     use Features\Auth\AuthController;
     use Features\Crud\CrudController;
     use Features\Users\UsersController;
@@ -67,7 +81,6 @@
     $router->addRoute('GET', '/users/{id}', [UsersController::class, 'getUser'], 'user');
     $router->addRoute('PUT', '/users/{id}', [UsersController::class, 'updateUser'], 'admin');
     $router->addRoute('DELETE', '/users/{id}', [UsersController::class, 'deleteUser'], 'admin');
-    $router->addRoute('POST', '/admin/query', [AdminQueryController::class, 'execute'], 'admin');
 
     $router->addRoute('GET', '/{appId}/{featureName}/all', [CrudController::class, 'list'], 'user');
     $router->addRoute('GET', '/{appId}/{featureName}/{id}', [CrudController::class, 'get'], 'user');

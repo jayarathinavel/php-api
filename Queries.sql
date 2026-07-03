@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `workTracker_task_comments` (
   KEY `idx_user_id` (`user_id`),
   CONSTRAINT `fk_comment_task` FOREIGN KEY (`task_id`) REFERENCES `workTracker_tasks` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-)
+);
 
 
 -- Create ytdb_lists table for YTDB feature

@@ -52,43 +52,6 @@ VALUES ('myApp', 'alpha', 'myApp_alpha', 'id');
 
 Now the feature is available through generic CRUD routes.
 
-## Admin SQL Endpoint
-
-Admins can run one DDL or DML statement through:
-
-```http
-POST /admin/query
-Content-Type: text/plain
-Authorization: Bearer <admin-token>
-X-App-Id: <app_id>
-
--- api.myApp_alpha definition
-
-CREATE TABLE `myApp_alpha` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `description` text,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-```
-
-JSON with parameters is also supported when needed:
-
-```http
-POST /admin/query
-Content-Type: application/json
-Authorization: Bearer <admin-token>
-X-App-Id: <app_id>
-
-{
-  "query": "INSERT INTO sample_table (name) VALUES (?)",
-  "params": ["Example"]
-}
-```
-
-Only these statement types are accepted: `CREATE`, `ALTER`, `DROP`, `TRUNCATE`, `RENAME`, `INSERT`, `UPDATE`, `DELETE`, and `REPLACE`. Multiple statements in one request are rejected.
-
 ## Generic CRUD Routes
 
 ```http

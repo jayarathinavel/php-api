@@ -17,7 +17,13 @@
             }
 
             $authHeader = $headers['Authorization'];
-            list($type, $token) = explode(' ', $authHeader, 2);
+            $parts = explode(' ', $authHeader, 2);
+            
+            if (count($parts) !== 2) {
+                $this->unauthorized();
+            }
+            
+            list($type, $token) = $parts;
 
             if (strcasecmp($type, 'Bearer') != 0 || !$token) {
                 $this->unauthorized();
