@@ -1,6 +1,8 @@
 <?php
     namespace Features\WorkTracker;
 
+    use Core\ApiException;
+
     class WorkLogService {
         private $repository;
 
@@ -13,20 +15,12 @@
          */
         public function create($data, $userId) {
             if (empty($data['date'])) {
-                return [
-                    'success' => false,
-                    'error' => 'Date is required',
-                    'statusCode' => 400
-                ];
+                throw new ApiException('Date is required', 400, 'MISSING_REQUIRED_FIELD');
             }
 
             // Validate date format (YYYY-MM-DD)
             if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data['date'])) {
-                return [
-                    'success' => false,
-                    'error' => 'Date must be in YYYY-MM-DD format',
-                    'statusCode' => 400
-                ];
+                throw new ApiException('Date must be in YYYY-MM-DD format', 400, 'INVALID_DATE_FORMAT');
             }
 
             $workLog = new WorkLog(
@@ -69,18 +63,10 @@
             if (!$workLog) {
                 $existingWorkLog = $this->repository->findById($id);
                 if ($existingWorkLog) {
-                    return [
-                        'success' => false,
-                        'error' => 'Access denied',
-                        'statusCode' => 403
-                    ];
+                    throw new ApiException('Access denied', 403, 'RESOURCE_NOT_OWNED');
                 }
 
-                return [
-                    'success' => false,
-                    'error' => 'Work log not found',
-                    'statusCode' => 404
-                ];
+                throw new ApiException('Work log not found', 404, 'WORKLOG_NOT_FOUND');
             }
 
             return [
@@ -99,28 +85,16 @@
             if (!$workLog) {
                 $existingWorkLog = $this->repository->findById($id);
                 if ($existingWorkLog) {
-                    return [
-                        'success' => false,
-                        'error' => 'Access denied',
-                        'statusCode' => 403
-                    ];
+                    throw new ApiException('Access denied', 403, 'RESOURCE_NOT_OWNED');
                 }
 
-                return [
-                    'success' => false,
-                    'error' => 'Work log not found',
-                    'statusCode' => 404
-                ];
+                throw new ApiException('Work log not found', 404, 'WORKLOG_NOT_FOUND');
             }
 
             if (isset($data['date'])) {
                 // Validate date format
                 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data['date'])) {
-                    return [
-                        'success' => false,
-                        'error' => 'Date must be in YYYY-MM-DD format',
-                        'statusCode' => 400
-                    ];
+                    throw new ApiException('Date must be in YYYY-MM-DD format', 400, 'INVALID_DATE_FORMAT');
                 }
                 $workLog->setDate($data['date']);
             }
@@ -149,18 +123,10 @@
             if (!$workLog) {
                 $existingWorkLog = $this->repository->findById($id);
                 if ($existingWorkLog) {
-                    return [
-                        'success' => false,
-                        'error' => 'Access denied',
-                        'statusCode' => 403
-                    ];
+                    throw new ApiException('Access denied', 403, 'RESOURCE_NOT_OWNED');
                 }
 
-                return [
-                    'success' => false,
-                    'error' => 'Work log not found',
-                    'statusCode' => 404
-                ];
+                throw new ApiException('Work log not found', 404, 'WORKLOG_NOT_FOUND');
             }
 
             $this->repository->delete($id, $userId);

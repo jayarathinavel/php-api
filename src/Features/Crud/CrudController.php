@@ -1,48 +1,98 @@
 <?php
     namespace Features\Crud;
 
-    class CrudController {
+    use Core\BaseController;
+    use Core\ApiException;
+
+    class CrudController extends BaseController {
         private $crudService;
 
         public function __construct() {
+            parent::__construct();
             $this->crudService = new CrudService();
         }
 
         public function list($appId, $featureName) {
-            $this->respond($this->crudService->list($appId, $featureName));
+            try {
+                $this->respond($this->crudService->list($appId, $featureName));
+            } catch (ApiException $e) {
+                $this->handleException($e);
+            } catch (\Exception $e) {
+                $this->handleException($e);
+            }
         }
 
         public function get($appId, $featureName, $id) {
-            $this->respond($this->crudService->get($appId, $featureName, $id));
+            try {
+                $this->respond($this->crudService->get($appId, $featureName, $id));
+            } catch (ApiException $e) {
+                $this->handleException($e);
+            } catch (\Exception $e) {
+                $this->handleException($e);
+            }
         }
 
         public function create($appId, $featureName) {
-            $payload = $this->getJsonBody();
-            $this->respond($this->crudService->create($appId, $featureName, $payload));
+            try {
+                $payload = $this->getJsonBodyForCrud();
+                $this->respond($this->crudService->create($appId, $featureName, $payload));
+            } catch (ApiException $e) {
+                $this->handleException($e);
+            } catch (\Exception $e) {
+                $this->handleException($e);
+            }
         }
 
         public function createMany($appId, $featureName) {
-            $payload = $this->getJsonBody();
-            $this->respond($this->crudService->createMany($appId, $featureName, $payload));
+            try {
+                $payload = $this->getJsonBodyForCrud();
+                $this->respond($this->crudService->createMany($appId, $featureName, $payload));
+            } catch (ApiException $e) {
+                $this->handleException($e);
+            } catch (\Exception $e) {
+                $this->handleException($e);
+            }
         }
 
         public function update($appId, $featureName, $id) {
-            $payload = $this->getJsonBody();
-            $this->respond($this->crudService->update($appId, $featureName, $id, $payload));
+            try {
+                $payload = $this->getJsonBodyForCrud();
+                $this->respond($this->crudService->update($appId, $featureName, $id, $payload));
+            } catch (ApiException $e) {
+                $this->handleException($e);
+            } catch (\Exception $e) {
+                $this->handleException($e);
+            }
         }
 
         public function delete($appId, $featureName, $id) {
-            $this->respond($this->crudService->delete($appId, $featureName, $id));
+            try {
+                $this->respond($this->crudService->delete($appId, $featureName, $id));
+            } catch (ApiException $e) {
+                $this->handleException($e);
+            } catch (\Exception $e) {
+                $this->handleException($e);
+            }
         }
 
-        private function getJsonBody() {
+        /**
+         * Get JSON body for CRUD operations (allows null/empty for some operations)
+         */
+        private function getJsonBodyForCrud() {
             $body = file_get_contents('php://input');
             if ($body === '') {
                 return null;
             }
 
             $payload = json_decode($body, true);
-            return json_last_error() === JSON_ERROR_NONE ? $payload : null;
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new ApiException(
+                    'Invalid JSON in request body: ' . json_last_error_msg(),
+                    400,
+                    'INVALID_JSON_PAYLOAD'
+                );
+            }
+            return $payload;
         }
 
         private function respond($result) {
@@ -54,3 +104,5 @@
             }
         }
     }
+
+// Made with Bob

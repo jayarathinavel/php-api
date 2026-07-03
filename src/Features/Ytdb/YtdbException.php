@@ -2,33 +2,29 @@
 
 namespace Features\Ytdb;
 
-use Exception;
+use Core\ApiException;
 
-class YtdbException extends Exception {
-    private $statusCode;
-    private $errorType;
-
-    public function __construct(string $message, int $statusCode = 500, string $errorType = 'YOUTUBE_API_ERROR', ?Exception $previous = null) {
-        parent::__construct($message, 0, $previous);
-        $this->statusCode = $statusCode;
-        $this->errorType = $errorType;
-    }
-
-    public function getStatusCode(): int {
-        return $this->statusCode;
-    }
-
-    public function getErrorType(): string {
-        return $this->errorType;
-    }
-
-    public function toArray(): array {
-        return [
-            'success' => false,
-            'error' => $this->getMessage(),
-            'errorType' => $this->errorType,
-            'statusCode' => $this->statusCode
-        ];
+/**
+ * YTDB-specific exception class
+ * Extends the base ApiException with YTDB-specific default error type
+ */
+class YtdbException extends ApiException {
+    
+    /**
+     * Create a new YTDB exception
+     *
+     * @param string $message Human-readable error message
+     * @param int $statusCode HTTP status code (default: 500)
+     * @param string $errorType Machine-readable error type (default: 'YOUTUBE_API_ERROR')
+     * @param Exception|null $previous Previous exception for chaining
+     */
+    public function __construct(
+        string $message,
+        int $statusCode = 500,
+        string $errorType = 'YOUTUBE_API_ERROR',
+        ?\Exception $previous = null
+    ) {
+        parent::__construct($message, $statusCode, $errorType, $previous);
     }
 }
 

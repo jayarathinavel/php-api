@@ -2,6 +2,8 @@
 
 namespace Features\WorkTracker;
 
+use Core\ApiException;
+
 class CommentService
 {
     private $commentRepository;
@@ -20,22 +22,18 @@ class CommentService
     {
         // Validate comment text
         if (empty($data['commentText'])) {
-            return [
-                'success' => false,
-                'error' => 'Comment text is required',
-                'statusCode' => 400
-            ];
+            throw new ApiException('Comment text is required', 400, 'MISSING_REQUIRED_FIELD');
         }
 
         $commentText = trim($data['commentText']);
         
         // Validate max length (1000 characters)
         if (strlen($commentText) > 1000) {
-            return [
-                'success' => false,
-                'error' => 'Comment text must not exceed 1000 characters',
-                'statusCode' => 400
-            ];
+            throw new ApiException(
+                'Comment text must not exceed 1000 characters',
+                400,
+                'INVALID_INPUT_LENGTH'
+            );
         }
 
         // Verify task exists and belongs to user
@@ -43,18 +41,10 @@ class CommentService
         if (!$task) {
             $existingTask = $this->taskRepository->findById($taskId);
             if ($existingTask) {
-                return [
-                    'success' => false,
-                    'error' => 'Access denied',
-                    'statusCode' => 403
-                ];
+                throw new ApiException('Access denied', 403, 'RESOURCE_NOT_OWNED');
             }
 
-            return [
-                'success' => false,
-                'error' => 'Task not found',
-                'statusCode' => 404
-            ];
+            throw new ApiException('Task not found', 404, 'TASK_NOT_FOUND');
         }
 
         // Create comment
@@ -83,18 +73,10 @@ class CommentService
         if (!$task) {
             $existingTask = $this->taskRepository->findById($taskId);
             if ($existingTask) {
-                return [
-                    'success' => false,
-                    'error' => 'Access denied',
-                    'statusCode' => 403
-                ];
+                throw new ApiException('Access denied', 403, 'RESOURCE_NOT_OWNED');
             }
 
-            return [
-                'success' => false,
-                'error' => 'Task not found',
-                'statusCode' => 404
-            ];
+            throw new ApiException('Task not found', 404, 'TASK_NOT_FOUND');
         }
 
         $comments = $this->commentRepository->findByTaskId($taskId);
@@ -115,22 +97,18 @@ class CommentService
     {
         // Validate comment text
         if (empty($data['commentText'])) {
-            return [
-                'success' => false,
-                'error' => 'Comment text is required',
-                'statusCode' => 400
-            ];
+            throw new ApiException('Comment text is required', 400, 'MISSING_REQUIRED_FIELD');
         }
 
         $commentText = trim($data['commentText']);
         
         // Validate max length (1000 characters)
         if (strlen($commentText) > 1000) {
-            return [
-                'success' => false,
-                'error' => 'Comment text must not exceed 1000 characters',
-                'statusCode' => 400
-            ];
+            throw new ApiException(
+                'Comment text must not exceed 1000 characters',
+                400,
+                'INVALID_INPUT_LENGTH'
+            );
         }
 
         // Verify comment exists and belongs to user
@@ -138,27 +116,19 @@ class CommentService
         if (!$comment) {
             $existingComment = $this->commentRepository->findById($id);
             if ($existingComment) {
-                return [
-                    'success' => false,
-                    'error' => 'You can only edit your own comments',
-                    'statusCode' => 403
-                ];
+                throw new ApiException('You can only edit your own comments', 403, 'RESOURCE_NOT_OWNED');
             }
 
-            return [
-                'success' => false,
-                'error' => 'Comment not found',
-                'statusCode' => 404
-            ];
+            throw new ApiException('Comment not found', 404, 'COMMENT_NOT_FOUND');
         }
 
         // Verify comment belongs to the specified task
         if ($comment->getTaskId() !== $taskId) {
-            return [
-                'success' => false,
-                'error' => 'Comment does not belong to this task',
-                'statusCode' => 400
-            ];
+            throw new ApiException(
+                'Comment does not belong to this task',
+                400,
+                'INVALID_COMMENT_TASK_MISMATCH'
+            );
         }
 
         // Update comment
@@ -182,38 +152,26 @@ class CommentService
         if (!$comment) {
             $existingComment = $this->commentRepository->findById($id);
             if ($existingComment) {
-                return [
-                    'success' => false,
-                    'error' => 'You can only delete your own comments',
-                    'statusCode' => 403
-                ];
+                throw new ApiException('You can only delete your own comments', 403, 'RESOURCE_NOT_OWNED');
             }
 
-            return [
-                'success' => false,
-                'error' => 'Comment not found',
-                'statusCode' => 404
-            ];
+            throw new ApiException('Comment not found', 404, 'COMMENT_NOT_FOUND');
         }
 
         // Verify comment belongs to the specified task
         if ($comment->getTaskId() !== $taskId) {
-            return [
-                'success' => false,
-                'error' => 'Comment does not belong to this task',
-                'statusCode' => 400
-            ];
+            throw new ApiException(
+                'Comment does not belong to this task',
+                400,
+                'INVALID_COMMENT_TASK_MISMATCH'
+            );
         }
 
         // Delete comment
         $deleted = $this->commentRepository->delete($id, $userId);
 
         if (!$deleted) {
-            return [
-                'success' => false,
-                'error' => 'Failed to delete comment',
-                'statusCode' => 500
-            ];
+            throw new ApiException('Failed to delete comment', 500, 'DELETE_OPERATION_FAILED');
         }
 
         return [
@@ -233,18 +191,10 @@ class CommentService
         if (!$task) {
             $existingTask = $this->taskRepository->findById($taskId);
             if ($existingTask) {
-                return [
-                    'success' => false,
-                    'error' => 'Access denied',
-                    'statusCode' => 403
-                ];
+                throw new ApiException('Access denied', 403, 'RESOURCE_NOT_OWNED');
             }
 
-            return [
-                'success' => false,
-                'error' => 'Task not found',
-                'statusCode' => 404
-            ];
+            throw new ApiException('Task not found', 404, 'TASK_NOT_FOUND');
         }
 
         $count = $this->commentRepository->getCommentCountByTaskId($taskId);

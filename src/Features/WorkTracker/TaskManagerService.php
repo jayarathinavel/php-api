@@ -1,6 +1,8 @@
 <?php
     namespace Features\WorkTracker;
 
+    use Core\ApiException;
+
     class TaskManagerService {
         private $repository;
 
@@ -15,11 +17,11 @@
             $status = $data['status'] ?? 'pending';
             $validStatuses = ['pending', 'in-progress', 'completed', 'cancelled'];
             if (!in_array($status, $validStatuses)) {
-                return [
-                    'success' => false,
-                    'error' => 'Invalid status. Must be one of: pending, in-progress, completed, cancelled',
-                    'statusCode' => 400
-                ];
+                throw new ApiException(
+                    'Invalid status. Must be one of: pending, in-progress, completed, cancelled',
+                    400,
+                    'INVALID_STATUS'
+                );
             }
 
             $task = new Task(
@@ -67,18 +69,10 @@
             if (!$task) {
                 $existingTask = $this->repository->findById($id);
                 if ($existingTask) {
-                    return [
-                        'success' => false,
-                        'error' => 'Access denied',
-                        'statusCode' => 403
-                    ];
+                    throw new ApiException('Access denied', 403, 'RESOURCE_NOT_OWNED');
                 }
 
-                return [
-                    'success' => false,
-                    'error' => 'Task not found',
-                    'statusCode' => 404
-                ];
+                throw new ApiException('Task not found', 404, 'TASK_NOT_FOUND');
             }
 
             return [
@@ -97,18 +91,10 @@
             if (!$task) {
                 $existingTask = $this->repository->findById($id);
                 if ($existingTask) {
-                    return [
-                        'success' => false,
-                        'error' => 'Access denied',
-                        'statusCode' => 403
-                    ];
+                    throw new ApiException('Access denied', 403, 'RESOURCE_NOT_OWNED');
                 }
 
-                return [
-                    'success' => false,
-                    'error' => 'Task not found',
-                    'statusCode' => 404
-                ];
+                throw new ApiException('Task not found', 404, 'TASK_NOT_FOUND');
             }
 
             if (isset($data['title'])) {
@@ -120,11 +106,11 @@
             if (isset($data['status'])) {
                 $validStatuses = ['pending', 'in-progress', 'completed', 'cancelled'];
                 if (!in_array($data['status'], $validStatuses)) {
-                    return [
-                        'success' => false,
-                        'error' => 'Invalid status. Must be one of: pending, in-progress, completed, cancelled',
-                        'statusCode' => 400
-                    ];
+                    throw new ApiException(
+                        'Invalid status. Must be one of: pending, in-progress, completed, cancelled',
+                        400,
+                        'INVALID_STATUS'
+                    );
                 }
                 $task->setStatus($data['status']);
             }
@@ -150,18 +136,10 @@
             if (!$task) {
                 $existingTask = $this->repository->findById($id);
                 if ($existingTask) {
-                    return [
-                        'success' => false,
-                        'error' => 'Access denied',
-                        'statusCode' => 403
-                    ];
+                    throw new ApiException('Access denied', 403, 'RESOURCE_NOT_OWNED');
                 }
 
-                return [
-                    'success' => false,
-                    'error' => 'Task not found',
-                    'statusCode' => 404
-                ];
+                throw new ApiException('Task not found', 404, 'TASK_NOT_FOUND');
             }
 
             $this->repository->delete($id, $userId);
@@ -173,3 +151,5 @@
             ];
         }
     }
+
+// Made with Bob
