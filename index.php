@@ -50,6 +50,20 @@
     // Buffer output so we can discard partial content on fatal errors
     ob_start();
 
+    // Request size limits - prevent DoS via large payloads
+    $maxRequestSize = 10 * 1024 * 1024; // 10MB
+    $contentLength = $_SERVER['CONTENT_LENGTH'] ?? 0;
+    
+    if ($contentLength > $maxRequestSize) {
+        header('Content-Type: application/json');
+        http_response_code(413);
+        echo json_encode([
+            'error' => 'Request entity too large',
+            'message' => 'Request body exceeds maximum allowed size of 10MB'
+        ]);
+        exit;
+    }
+
     date_default_timezone_set('Asia/Kolkata');
 
     // Security Headers

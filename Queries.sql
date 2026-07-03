@@ -115,3 +115,13 @@ CREATE TABLE `ytdb_users` (
   CONSTRAINT `fk_ytdb_users_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `chk_avatar_id` CHECK ((`avatar_id` IS NULL OR (`avatar_id` >= 1 AND `avatar_id` <= 20)))
 );
+
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    app_id VARCHAR(50) NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_email_app (email, app_id),
+    INDEX idx_attempted_at (attempted_at)
+);
