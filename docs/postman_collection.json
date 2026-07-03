@@ -1,141 +1,162 @@
 {
   "info": {
-    "name": "My API - Users, Auth & Generic CRUD",
+    "name": "My API - Complete Collection",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Postman collection for the Hobby-Projects API (users, auth, and metadata-driven generic CRUD)."
+    "description": "Complete Postman collection for the Hobby-Projects API including Auth, Users, Generic CRUD, Work Tracker, and YTDB features."
   },
   "variable": [
     { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
     { "key": "app_id", "value": "myApp", "type": "string" },
     { "key": "feature_name", "value": "alpha", "type": "string" },
-    { "key": "record_id", "value": "", "type": "string" },    { "key": "taskId", "value": "", "type": "string" },
-    { "key": "workLogId", "value": "", "type": "string" },    { "key": "token", "value": "", "type": "string" },
-    { "key": "userId", "value": "", "type": "string" }
+    { "key": "record_id", "value": "", "type": "string" },
+    { "key": "taskId", "value": "", "type": "string" },
+    { "key": "workLogId", "value": "", "type": "string" },
+    { "key": "commentId", "value": "", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "userId", "value": "", "type": "string" },
+    { "key": "listId", "value": "", "type": "string" },
+    { "key": "videoId", "value": "", "type": "string" }
   ],
   "item": [
     {
-      "name": "Register",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"secret123\",\n  \"app_id\": \"{{app_id}}\"\n}"
-        },
-        "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] }
-      },
-      "response": []
-    },
-    {
-      "name": "Login",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "X-App-Id", "value": "{{app_id}}" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"secret123\"\n}"
-        },
-        "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
-      },
-      "event": [
+      "name": "Auth",
+      "description": "Authentication endpoints for user registration and login.",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "var json = pm.response.json();",
-              "if(json && json.token){ pm.environment.set('token', json.token); }",
-              "// Save returned user id if present",
-              "if(json.user && json.user.id){ pm.environment.set('userId', json.user.id); }",
-              
-              "var json = pm.response.json();",
-              "if(json && json.token){ pm.collectionVariables.set('token', json.token); }",
-              "// Save returned user id if present",
-              "if(json.user && json.user.id){ pm.collectionVariables.set('userId', json.user.id); }"
-
-            ]
-          }
+          "name": "API Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/", "host": ["{{base_url}}"], "path": [""] }
+          },
+          "response": []
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"secret123\",\n  \"app_id\": \"{{app_id}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-App-Id", "value": "{{app_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"secret123\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if(json && json.token){ pm.environment.set('token', json.token); }",
+                  "if(json.user && json.user.id){ pm.environment.set('userId', json.user.id); }",
+                  "if(json && json.token){ pm.collectionVariables.set('token', json.token); }",
+                  "if(json.user && json.user.id){ pm.collectionVariables.set('userId', json.user.id); }"
+                ]
+              }
+            }
+          ],
+          "response": []
         }
-      ],
-      "response": []
+      ]
     },
     {
-      "name": "Create User",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "X-App-Id", "value": "{{app_id}}" },
-          { "key": "Authorization", "value": "Bearer {{token}}" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"new@example.com\",\n  \"password\": \"pass123\",\n  \"role\": \"user\"\n}"
+      "name": "Users",
+      "description": "User management endpoints.",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"new@example.com\",\n  \"password\": \"pass123\",\n  \"role\": \"user\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+          },
+          "response": []
         },
-        "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
-      },
-      "response": []
-    },
-    {
-      "name": "Get Users",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "X-App-Id", "value": "{{app_id}}" },
-          { "key": "Authorization", "value": "Bearer {{token}}" }
-        ],
-        "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
-      },
-      "response": []
-    },
-    {
-      "name": "Get User by ID",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "X-App-Id", "value": "{{app_id}}" },
-          { "key": "Authorization", "value": "Bearer {{token}}" }
-        ],
-        "url": { "raw": "{{base_url}}/users/{{userId}}", "host": ["{{base_url}}"], "path": ["users", "{{userId}}"] }
-      },
-      "response": []
-    },
-    {
-      "name": "Update User",
-      "request": {
-        "method": "PUT",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "X-App-Id", "value": "{{app_id}}" },
-          { "key": "Authorization", "value": "Bearer {{token}}" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"name\": \"Updated Name\"\n}"
+        {
+          "name": "Get Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+          },
+          "response": []
         },
-        "url": { "raw": "{{base_url}}/users/{{userId}}", "host": ["{{base_url}}"], "path": ["users", "{{userId}}"] }
-      },
-      "response": []
-    },
-    {
-      "name": "Delete User",
-      "request": {
-        "method": "DELETE",
-        "header": [
-          { "key": "X-App-Id", "value": "{{app_id}}" },
-          { "key": "Authorization", "value": "Bearer {{token}}" }
-        ],
-        "url": { "raw": "{{base_url}}/users/{{userId}}", "host": ["{{base_url}}"], "path": ["users", "{{userId}}"] }
-      },
-      "response": []
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/users/{{userId}}", "host": ["{{base_url}}"], "path": ["users", "{{userId}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/users/{{userId}}", "host": ["{{base_url}}"], "path": ["users", "{{userId}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "X-App-Id", "value": "{{app_id}}" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/users/{{userId}}", "host": ["{{base_url}}"], "path": ["users", "{{userId}}"] }
+          },
+          "response": []
+        }
+      ]
     },
     {
       "name": "Generic CRUD",
-      "description": "Before using these requests, create the target feature table and add one row to crud_resources, for example: app_id={{app_id}}, feature_name={{feature_name}}, table_name={{app_id}}_{{feature_name}}, primary_key=id.",
+      "description": "Metadata-driven generic CRUD operations. Before using, create the target feature table and add one row to crud_resources with app_id, feature_name, table_name, and primary_key.",
       "item": [
         {
           "name": "List Records",
@@ -193,9 +214,6 @@
                   "var json = pm.response.json();",
                   "if (json && json.data && json.data.id) {",
                   "  pm.environment.set('record_id', json.data.id);",
-                  "}",
-                  "var json = pm.response.json();",
-                  "if (json && json.data && json.data.id) {",
                   "  pm.collectionVariables.set('record_id', json.data.id);",
                   "}"
                 ]
@@ -278,241 +296,709 @@
             }
           },
           "response": []
-        },
-        {
-          "name": "Invalid Body Example",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"unknown_column\": \"This should fail\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/{{app_id}}/{{feature_name}}",
-              "host": ["{{base_url}}"],
-              "path": ["{{app_id}}", "{{feature_name}}"]
-            }
-          },
-          "response": []
         }
       ]
     },
     {
       "name": "Work Tracker",
-      "description": "Task manager and work log endpoints for the work tracker feature.",
+      "description": "Task management, work logs, and comments for the work tracker feature.",
       "item": [
         {
-          "name": "Create Task",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-App-Id", "value": "{{app_id}}" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Sprint planning\",\n  \"description\": \"Plan the next sprint tasks\",\n  \"status\": \"pending\",\n  \"reference\": \"WEB-123\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/work-tracker/task-manager",
-              "host": ["{{base_url}}"],
-              "path": ["work-tracker", "task-manager"]
-            }
-          },
-          "event": [
+          "name": "Tasks",
+          "description": "Task management endpoints.",
+          "item": [
             {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var json = pm.response.json();",
-                  "if (json && json.id) {",
-                  "  pm.collectionVariables.set('taskId', json.id);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "response": []
-        },
-        {
-          "name": "Get Tasks",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "X-App-Id", "value": "{{app_id}}" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/work-tracker/task-manager",
-              "host": ["{{base_url}}"],
-              "path": ["work-tracker", "task-manager"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Task by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "X-App-Id", "value": "{{app_id}}" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}",
-              "host": ["{{base_url}}"],
-              "path": ["work-tracker", "task-manager", "{{taskId}}"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update Task",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-App-Id", "value": "{{app_id}}" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"in-progress\",\n  \"description\": \"Updating to in-progress status\"\n}"
+              "name": "Create Task",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Sprint planning\",\n  \"description\": \"Plan the next sprint tasks\",\n  \"status\": \"pending\",\n  \"reference\": \"WEB-123\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/task-manager",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "task-manager"]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var json = pm.response.json();",
+                      "if (json && json.id) {",
+                      "  pm.collectionVariables.set('taskId', json.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
             },
-            "url": {
-              "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}",
-              "host": ["{{base_url}}"],
-              "path": ["work-tracker", "task-manager", "{{taskId}}"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Delete Task",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "X-App-Id", "value": "{{app_id}}" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}",
-              "host": ["{{base_url}}"],
-              "path": ["work-tracker", "task-manager", "{{taskId}}"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Create Work Log",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-App-Id", "value": "{{app_id}}" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"date\": \"2026-05-28\",\n  \"done\": \"Completed initial task planning\",\n  \"todo\": \"Review backlog and assign tickets\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/work-tracker/work-log",
-              "host": ["{{base_url}}"],
-              "path": ["work-tracker", "work-log"]
-            }
-          },
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var json = pm.response.json();",
-                  "if (json && json.id) {",
-                  "  pm.collectionVariables.set('workLogId', json.id);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "response": []
-        },
-        {
-          "name": "Get Work Logs",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "X-App-Id", "value": "{{app_id}}" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/work-tracker/work-log",
-              "host": ["{{base_url}}"],
-              "path": ["work-tracker", "work-log"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Work Log by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "X-App-Id", "value": "{{app_id}}" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/work-tracker/work-log/{{workLogId}}",
-              "host": ["{{base_url}}"],
-              "path": ["work-tracker", "work-log", "{{workLogId}}"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update Work Log",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-App-Id", "value": "{{app_id}}" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"done\": \"Updated work log details\",\n  \"todo\": \"Prepare follow-up actions\"\n}"
+              "name": "Get Tasks",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/task-manager",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "task-manager"]
+                }
+              },
+              "response": []
             },
-            "url": {
-              "raw": "{{base_url}}/work-tracker/work-log/{{workLogId}}",
-              "host": ["{{base_url}}"],
-              "path": ["work-tracker", "work-log", "{{workLogId}}"]
+            {
+              "name": "Get Task by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "task-manager", "{{taskId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Task",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"in-progress\",\n  \"description\": \"Updating to in-progress status\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "task-manager", "{{taskId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Task",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "task-manager", "{{taskId}}"]
+                }
+              },
+              "response": []
             }
-          },
-          "response": []
+          ]
         },
         {
-          "name": "Delete Work Log",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "X-App-Id", "value": "{{app_id}}" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/work-tracker/work-log/{{workLogId}}",
-              "host": ["{{base_url}}"],
-              "path": ["work-tracker", "work-log", "{{workLogId}}"]
+          "name": "Comments",
+          "description": "Task comment endpoints.",
+          "item": [
+            {
+              "name": "Create Comment",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"commentText\": \"This is a comment on the task\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}/comments",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "task-manager", "{{taskId}}", "comments"]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var json = pm.response.json();",
+                      "if (json && json.id) {",
+                      "  pm.collectionVariables.set('commentId', json.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Get Task Comments",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}/comments",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "task-manager", "{{taskId}}", "comments"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Comments Count",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}/comments/count",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "task-manager", "{{taskId}}", "comments", "count"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Comment",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"commentText\": \"Updated comment text\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}/comments/{{commentId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "task-manager", "{{taskId}}", "comments", "{{commentId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Comment",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/task-manager/{{taskId}}/comments/{{commentId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "task-manager", "{{taskId}}", "comments", "{{commentId}}"]
+                }
+              },
+              "response": []
             }
-          },
-          "response": []
+          ]
+        },
+        {
+          "name": "Work Logs",
+          "description": "Work log endpoints.",
+          "item": [
+            {
+              "name": "Create Work Log",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"date\": \"2026-07-03\",\n  \"done\": \"Completed initial task planning\",\n  \"todo\": \"Review backlog and assign tickets\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/work-log",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "work-log"]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var json = pm.response.json();",
+                      "if (json && json.id) {",
+                      "  pm.collectionVariables.set('workLogId', json.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Get Work Logs",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/work-log",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "work-log"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Work Log by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/work-log/{{workLogId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "work-log", "{{workLogId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Work Log",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"done\": \"Updated work log details\",\n  \"todo\": \"Prepare follow-up actions\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/work-log/{{workLogId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "work-log", "{{workLogId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Work Log",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/work-tracker/work-log/{{workLogId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["work-tracker", "work-log", "{{workLogId}}"]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "YTDB",
+      "description": "YouTube Database feature for managing lists, videos, and user profiles.",
+      "item": [
+        {
+          "name": "Lists",
+          "description": "Manage YouTube video lists.",
+          "item": [
+            {
+              "name": "Create List",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"My Favorite Videos\",\n  \"description\": \"A collection of my favorite YouTube videos\",\n  \"emoji\": \"⭐\",\n  \"visibility\": \"public\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/ytdb/lists",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "lists"]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var json = pm.response.json();",
+                      "if (json && json.id) {",
+                      "  pm.collectionVariables.set('listId', json.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Get My Lists",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/ytdb/lists",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "lists"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get All Lists",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/ytdb/lists/all",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "lists", "all"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get List by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/ytdb/lists/{{listId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "lists", "{{listId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update List",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated List Name\",\n  \"description\": \"Updated description\",\n  \"emoji\": \"📝\",\n  \"visibility\": \"private\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/ytdb/lists/{{listId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "lists", "{{listId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete List",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/ytdb/lists/{{listId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "lists", "{{listId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get User Public Lists",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/ytdb/users/{{userId}}/public-lists",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "users", "{{userId}}", "public-lists"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Videos",
+          "description": "Manage YouTube videos in lists.",
+          "item": [
+            {
+              "name": "Create Video",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"link\": \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\",\n  \"listId\": \"{{listId}}\",\n  \"description\": \"Sample video description\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/ytdb/videos",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "videos"]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var json = pm.response.json();",
+                      "if (json && json.id) {",
+                      "  pm.collectionVariables.set('videoId', json.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Get My Videos",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/ytdb/my-videos",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "my-videos"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get All Videos",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/ytdb/all-videos",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "all-videos"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Videos by List ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/ytdb/list-videos/{{listId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "list-videos", "{{listId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Video by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/ytdb/video/{{videoId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "video", "{{videoId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Video",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"link\": \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\",\n  \"description\": \"Updated video description\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/ytdb/videos/{{videoId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "videos", "{{videoId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Video",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/ytdb/videos/{{videoId}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "videos", "{{videoId}}"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Users",
+          "description": "YTDB user profile management.",
+          "item": [
+            {
+              "name": "Get Profile",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/ytdb/users/profile",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "users", "profile"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Profile",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"My Display Name\",\n  \"avatar_id\": 5\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/ytdb/users/profile",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "users", "profile"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Avatar",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"avatar_id\": 10\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/ytdb/users/avatar",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "users", "avatar"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Community Users",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "X-App-Id", "value": "{{app_id}}" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/ytdb/community-users",
+                  "host": ["{{base_url}}"],
+                  "path": ["ytdb", "community-users"]
+                }
+              },
+              "response": []
+            }
+          ]
         }
       ]
     }
   ]
 }
-
