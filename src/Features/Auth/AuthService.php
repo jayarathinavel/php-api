@@ -21,7 +21,7 @@
                 return ['success' => false, 'message' => "Registration is disabled"];
             }
 
-            // Validate data
+            // Validate required fields
             if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
                 return ['success' => false, 'message' => 'Name, email, and password are required'];
             }
@@ -30,11 +30,34 @@
                 return ['success' => false, 'message' => 'app_id is required'];
             }
 
-            // Optionally, allow role assignment (ensure this is secure)
-            $role = isset($data['role']) ? $data['role'] : 'user';
-            if ($role == 'admin') {
-                return ['success' => false, 'message' => 'Cannot Register a Admin User'];
+            // Validate email format
+            if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+                return ['success' => false, 'message' => 'Invalid email format'];
             }
+
+            // Validate email length
+            if (strlen($data['email']) > 255) {
+                return ['success' => false, 'message' => 'Email is too long (max 255 characters)'];
+            }
+
+            // Validate name length
+            if (strlen($data['name']) > 255) {
+                return ['success' => false, 'message' => 'Name is too long (max 255 characters)'];
+            }
+
+            if (strlen($data['name']) < 2) {
+                return ['success' => false, 'message' => 'Name is too short (min 2 characters)'];
+            }
+
+            // Validate password strength
+            $passwordValidation = $this->validatePasswordStrength($data['password']);
+            if (!$passwordValidation['valid']) {
+                return ['success' => false, 'message' => $passwordValidation['message']];
+            }
+
+            // Validate and sanitize role - only allow 'user' role during registration
+            $allowedRoles = ['user'];
+            $role = isset($data['role']) && in_array($data['role'], $allowedRoles) ? $data['role'] : 'user';
 
             // Check if user exists for this app
             if ($this->authRepository->findByEmail($data['email'], $appId)) {
@@ -67,8 +90,22 @@
                 return ['success' => false, 'message' => 'Email and password are required'];
             }
 
+            // Validate email format
+            if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+                return ['success' => false, 'message' => 'Invalid email format'];
+            }
+
+            // Mitigate timing attacks by always performing password verification
             $user = $this->authRepository->findByEmail($data['email'], $appId);
-            if (!$user || !password_verify($data['password'], $user->getPassword())) {
+            $dummyHash = '$2y$10$abcdefghijklmnopqrstuv.WXYZ0123456789ABCDEFGHIJKLMNOPQRS';
+            
+            if (!$user) {
+                // Perform dummy password verification to maintain consistent timing
+                password_verify($data['password'], $dummyHash);
+                return ['success' => false, 'message' => 'Invalid credentials'];
+            }
+            
+            if (!password_verify($data['password'], $user->getPassword())) {
                 return ['success' => false, 'message' => 'Invalid credentials'];
             }
 
@@ -117,5 +154,68 @@
             } catch (\Exception $e) {
                 return null;
             }
+        }
+
+        /**
+         * Validate password strength
+         * Requirements: minimum 12 characters, uppercase, lowercase, number, special character
+         */
+        private function validatePasswordStrength($password) {
+            if (strlen($password) < 12) {
+                return [
+                    'valid' => false,
+                    'message' => 'Password must be at least 12 characters long'
+                ];
+            }
+
+            if (strlen($password) > 128) {
+                return [
+                    'valid' => false,
+                    'message' => 'Password is too long (max 128 characters)'
+                ];
+            }
+
+            if (!preg_match('/[A-Z]/', $password)) {
+                return [
+                    'valid' => false,
+                    'message' => 'Password must contain at least one uppercase letter'
+                ];
+            }
+
+            if (!preg_match('/[a-z]/', $password)) {
+                return [
+                    'valid' => false,
+                    'message' => 'Password must contain at least one lowercase letter'
+                ];
+            }
+
+            if (!preg_match('/[0-9]/', $password)) {
+                return [
+                    'valid' => false,
+                    'message' => 'Password must contain at least one number'
+                ];
+            }
+
+            if (!preg_match('/[^A-Za-z0-9]/', $password)) {
+                return [
+                    'valid' => false,
+                    'message' => 'Password must contain at least one special character'
+                ];
+            }
+
+            // Check against common passwords (basic list)
+            $commonPasswords = [
+                'password123!', 'Password123!', 'Admin123!', 'Welcome123!',
+                'Qwerty123!', '123456789!', 'Passw0rd!', 'P@ssw0rd'
+            ];
+            
+            if (in_array($password, $commonPasswords, true)) {
+                return [
+                    'valid' => false,
+                    'message' => 'Password is too common, please choose a stronger password'
+                ];
+            }
+
+            return ['valid' => true];
         }
     }

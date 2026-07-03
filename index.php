@@ -4,6 +4,15 @@
     ini_set('display_startup_errors', '0');
     error_reporting(E_ALL);
 
+    // HTTPS Enforcement for production
+    if (getenv('APP_ENV') === 'production') {
+        if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
+            header('HTTP/1.1 301 Moved Permanently');
+            header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
+            exit;
+        }
+    }
+
     // Catch fatal errors and return a clean JSON error instead of HTML
     register_shutdown_function(function () {
         $error = error_get_last();
@@ -16,10 +25,25 @@
             if (ob_get_level() > 0) {
                 ob_end_clean();
             }
-            echo json_encode([
-                'error' => 'An internal server error occurred',
-                'errorType' => 'FATAL_ERROR'
-            ]);
+            
+            // Log detailed error server-side
+            error_log(sprintf(
+                "Fatal Error: %s in %s on line %d",
+                $error['message'],
+                $error['file'],
+                $error['line']
+            ));
+            
+            // Return generic error to client (no details in production)
+            $response = ['error' => 'An internal server error occurred'];
+            if (getenv('APP_ENV') !== 'production') {
+                $response['debug'] = [
+                    'message' => $error['message'],
+                    'file' => $error['file'],
+                    'line' => $error['line']
+                ];
+            }
+            echo json_encode($response);
         }
     });
 
@@ -27,6 +51,16 @@
     ob_start();
 
     date_default_timezone_set('Asia/Kolkata');
+
+    // Security Headers
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: DENY');
+    header('X-XSS-Protection: 1; mode=block');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Content-Security-Policy: default-src \'self\'');
+    if (getenv('APP_ENV') === 'production') {
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+    }
 
     // CORS Headers - Secure configuration
     $allowedOrigins = getenv('ALLOWED_ORIGINS') ?: '*';
